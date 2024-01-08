@@ -5,6 +5,7 @@
   "type": "module",
   "main": "src/server.ts",
   "scripts": {
+    "start:docker": "pm2-runtime start src/server.ts --name backend -i 5", 
     "start": "ts-node src/server.ts",
     "dev": "nodemon src/server.ts",
     "format": "prettier --write src/ --config .prettierrc"

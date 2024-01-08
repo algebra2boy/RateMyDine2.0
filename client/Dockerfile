@@ -10,4 +10,7 @@ RUN npm install
 # Make sure you delete node_modules on your host, before building the image
 COPY ./ ./
 
+# need the build the front end folder
+RUN npm run build
+
 CMD ["npm", "run", "start:docker"]

@@ -1,8 +1,9 @@
 import express from 'express';
+import { Request, Response } from "express";
 
 const app = express();
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
 	res.status(201).json({ message: 'hello' });
 });
 

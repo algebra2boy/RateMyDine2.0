@@ -8,7 +8,8 @@
     "start:docker": "pm2-runtime start src/server.ts --name backend -i 5", 
     "start": "ts-node src/server.ts",
     "dev": "nodemon src/server.ts",
-    "format": "prettier --write src/ --config .prettierrc"
+    "format": "prettier --write src/ --config .prettierrc",
+    "lint": "eslint src/ --config .eslintrc.json"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:18-alpine
 
 RUN npm install -g pm2
 

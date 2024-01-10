@@ -2,5 +2,6 @@
     "restartable": "r",
     "ignore": ["/node_modules", "/dist", "tsconfig.json"],
     "watch": ["src/"],
-    "ext": "js, ts, json "
+    "ext": "js, ts, json ",
+    "exec": "ts-node src/server.ts"
 }

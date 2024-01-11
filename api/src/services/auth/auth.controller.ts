@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
-import { Collection } from 'mongodb';
 import { MongoDB } from '../../configs/mongodb.js';
 import * as userService from './auth.service.js';
+
+// interface
+import { Collection } from 'mongodb';
 import { User } from './auth.model.js';
 
 /**
@@ -17,22 +19,21 @@ import { User } from './auth.model.js';
  * @return a json body with message indicating whether it is successful
  */
 const signUp = async (req: Request, res: Response) => {
+  const UserCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
 
-    const UserCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
+  const user = await userService.findUserByEmail(UserCollection, req.body.email);
 
-    const user = await userService.findUserByEmail(UserCollection, req.body.email);
+  if (user) {
+    // 403: Forbidden, server understands the request but refuses to authorize it.
+    return res.status(403).json({ message: `user with ${req.body.email} is already existed` });
+  }
 
-    if (user) {
-        // 403: Forbidden, server understands the request but refuses to authorize it.
-        return res.status(403).json({ "message": `user with ${req.body.email} is already existed` })
-    }
-
-    try {
-        await userService.createUser(UserCollection, req.body);
-        res.status(201).json({ message: 'succesfully created an user' });
-    } catch (error) {
-        res.status(500).send({ status: "failure" });
-    }
+  try {
+    await userService.createUser(UserCollection, req.body);
+    res.status(201).json({ message: 'succesfully created an user' });
+  } catch (error) {
+    res.status(500).send({ status: 'failure' });
+  }
 };
 
 export { signUp };

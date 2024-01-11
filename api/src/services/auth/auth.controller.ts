@@ -7,6 +7,33 @@ import { Collection } from 'mongodb';
 import { User } from './auth.model.js';
 
 /**
+ * Login for a user
+ * @authentication none
+ * @route {POST} /api/auth/login
+ * @bodyparam
+ *  - email {string}: the email of user
+ *  - password {string}: the password of user
+ * @return a json body with message indicating whether login is successful
+ */
+const login = async (req: Request, res: Response) => {
+    const UserCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
+
+    const user = await userService.findUserByEmail(UserCollection, req.body.email);
+
+    if (!user) {
+        return res.status(404).json({ message: `user with ${req.body.email} is not found` });
+    }
+
+    const isPasswordCorrect: boolean = await userService.validatePassword(user, req.body.password);
+
+    if (!isPasswordCorrect) {
+        res.status(401).json({ message: `user with ${req.body.email} has incorrect password` });
+    } else {
+        res.status(201).json({ message: `successfully login` });
+    }
+};
+
+/**
  * Sign up a user
  * @authentication none
  * @route {POST} /api/auth/signup
@@ -16,24 +43,24 @@ import { User } from './auth.model.js';
  *  - password {string}: the password of user
  *  - firstName {string}: the first name of user
  *  - lastName {string}: the last name of user
- * @return a json body with message indicating whether it is successful
+ * @return a json body with message indicating whether sign up is successful
  */
 const signUp = async (req: Request, res: Response) => {
-  const UserCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
+    const UserCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
 
-  const user = await userService.findUserByEmail(UserCollection, req.body.email);
+    const user = await userService.findUserByEmail(UserCollection, req.body.email);
 
-  if (user) {
-    // 403: Forbidden, server understands the request but refuses to authorize it.
-    return res.status(403).json({ message: `user with ${req.body.email} is already existed` });
-  }
+    if (user) {
+        // 403: Forbidden, server understands the request but refuses to authorize it.
+        return res.status(403).json({ message: `user with ${req.body.email} is already existed` });
+    }
 
-  try {
-    await userService.createUser(UserCollection, req.body);
-    res.status(201).json({ message: 'succesfully created an user' });
-  } catch (error) {
-    res.status(500).send({ status: 'failure' });
-  }
+    try {
+        await userService.createUser(UserCollection, req.body);
+        res.status(201).json({ message: 'succesfully created an user' });
+    } catch (error) {
+        res.status(500).send({ status: 'failure' });
+    }
 };
 
-export { signUp };
+export { signUp, login };

@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 
 app.get('/', (req: Request, res: Response) => {
-  res.status(201).json({ message: 'hello' });
+    res.status(201).json({ message: 'hello' });
 });
 
 /*
@@ -26,8 +26,8 @@ app.use(express.json());
 app.use('/api', routes);
 
 // Establish mongodb connection
-// MongoDB.getInstance().runServer();
+MongoDB.getInstance().runServer();
 
 app.listen(8080, () => {
-  console.log('the server is running on port 8080');
+    console.log('the server is running on port 8080');
 });

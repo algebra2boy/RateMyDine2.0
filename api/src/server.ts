@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv';
 
 import { MongoDB } from './configs/mongodb.js';
 import routes from './routes/routes.js';
+import ErrorMiddleware from './middlewares/Error.mw.js';
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ app.get('/', (req: Request, res: Response) => {
 
 // Establish mongodb connection
 // MongoDB.getInstance().runServer();
+
+app.use(ErrorMiddleware);
 
 /**
  * Server Listening for connections

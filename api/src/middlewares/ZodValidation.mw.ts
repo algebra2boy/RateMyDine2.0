@@ -7,16 +7,15 @@ import { ZodError, ZodSchema } from 'zod';
  * otherwise, the middleware will return a series of errors from Zod.
  * @param schema
  */
-const ZodMiddleware =
-    (schema: ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const requestStructure = { body: req.body, query: req.query, params: req.params };
-            schema.parse(requestStructure);
+const ZodMiddleware = (schema: ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const requestStructure = { body: req.body, query: req.query, params: req.params };
+        schema.parse(requestStructure);
 
-            next();
-        } catch (error) {
-            return res.status(400).send((error as ZodError).issues.map(x => x.message));
-        }
-    };
+        next();
+    } catch (error) {
+        return res.status(400).send((error as ZodError).issues.map(x => x.message));
+    }
+};
 
 export default ZodMiddleware;

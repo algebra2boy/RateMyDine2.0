@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 
 import { MongoDB } from './configs/mongodb.js';
 import routes from './routes/routes.js';
@@ -20,7 +20,7 @@ app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use('/api', routes);
+app.use(routes);
 
 app.get('/', (req: Request, res: Response) => {
     res.status(201).json({ message: 'hello' });
@@ -29,7 +29,7 @@ app.get('/', (req: Request, res: Response) => {
 // Establish mongodb connection
 // MongoDB.getInstance().runServer();
 
-app.use(ErrorMiddleware);
+// app.use(ErrorMiddleware);
 
 /**
  * Server Listening for connections

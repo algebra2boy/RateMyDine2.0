@@ -3,8 +3,9 @@ import { MongoDB } from '../../configs/mongodb.js';
 import * as userService from './auth.service.js';
 
 // interface
-import { Collection } from 'mongodb';
+import { Collection, ObjectId } from 'mongodb';
 import { User } from './auth.model.js';
+import { generateToken } from '../../utils/jwt.utils.js';
 
 /**
  * Login for a user
@@ -58,4 +59,12 @@ const signUp = async (req: Request, res: Response) => {
     }
 };
 
-export { signUp, login };
+const testjwt = (req: Request, res: Response) => {
+    res.send('HELLO jwt');
+};
+
+const testlogin = (req: Request, res: Response) => {
+    res.send({ token: generateToken(new ObjectId(1234)) });
+};
+
+export { signUp, login, testjwt, testlogin };

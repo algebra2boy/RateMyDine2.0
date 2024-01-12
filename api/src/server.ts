@@ -2,13 +2,14 @@ import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import 'dotenv/config'
+
+// dotenv.config();
 
 import { MongoDB } from './configs/mongodb.js';
 import routes from './routes/routes.js';
 import ErrorMiddleware from './middlewares/Error.mw.js';
 
-dotenv.config();
 
 const app = express();
 
@@ -27,7 +28,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Establish mongodb connection
-// MongoDB.getInstance().runServer();
+// await MongoDB.getInstance().runServer();
 
 // app.use(ErrorMiddleware);
 

@@ -1,9 +1,8 @@
 import express from "express";
 import { MongoDB } from "../../configs/mongodb.js";
-import * as dotenv from "dotenv";
-dotenv.config();
+import * as dbUtils from "../../utils/db.utils.js";
+
 const reviewRouter = express.Router();
-await MongoDB.getInstance().runServer();
 const server = MongoDB.getRateMyDineDB();
 
 
@@ -18,32 +17,32 @@ reviewRouter.get("/diningInfo", async (req, res) => {
 //     res.sendFile("./client/HTML/dining.html", { root: "./" });
 // });
 
-// // retrieve dining info 
-// reviewRouter.get("/info/:diningHall", async (req, res) => {
-//     // grabs the dining hall name from the URL
-//     let diningName   = req.params.diningHall;
-//     const diningInfo = await server.diningInfo.findOne({"name": diningName});
-//     // Dining Hall information doesn't exist
-//     if (diningInfo === null) {
-//         res.status(404).send({
-//             "message": `${diningName} is not found in the database`,
-//             "status": "failure"
-//         });
-//     } else {
-//         const { name, address, phone, numReview, description, mapURL, hours} = diningInfo;
-//         const diningObj  = new DiningHall(name, address, phone, numReview, description, mapURL, new Hours(...hours));
-//         res.send(diningObj);
-//     }
-// });
+// retrieve dining info 
+reviewRouter.get("/info/:diningHall", async (req, res) => {
+    // grabs the dining hall name from the URL
+    const diningName   = req.params.diningHall;
+    const diningInfo = await server.collection("diningInfo").findOne({"name": diningName});
+    // Dining Hall information doesn't exist
+    if (diningInfo === null) {
+        res.status(404).send({
+            "message": `${diningName} is not found in the database`,
+            "status": "failure"
+        });
+    } else {
+        // const { name, address, phone, numReview, description, mapURL, hours} = diningInfo;
+        const diningObj  = diningInfo //new DiningHall(name, address, phone, numReview, description, mapURL, new Hours(...hours));
+        res.send(diningObj);
+    }
+});
 
-// // get all the food review from a particular dining hall
-// reviewRouter.get("/review/:dininghall", async (req, res) => {
-//     // grabs query parameters and calls corresponding helper function
-//     let diningHallName = req.params.dininghall; 
+// get all the food review from a particular dining hall
+reviewRouter.get("/review/:dininghall", async (req, res) => {
+    // grabs query parameters and calls corresponding helper function
+    const diningHallName = req.params.dininghall; 
 
-//     let document = await dbUtils.getReview(diningHallName); 
-//     res.send(document); 
-// });
+    const document = await dbUtils.getReview(diningHallName); 
+    res.send(document); 
+});
 
 // // create a new food review for a particular dining hall
 // reviewRouter.post("/review/:diningHall", ValidateFoodReviewSchema,  async (req, res) => {

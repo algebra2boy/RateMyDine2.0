@@ -3,5 +3,6 @@
 
 **/.svelte-kit
 **/build
+**/dist
 
 .env

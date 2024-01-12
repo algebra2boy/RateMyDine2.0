@@ -1,30 +1,35 @@
-import { Collection, WithId } from 'mongodb';
+import { Collection, ObjectId } from 'mongodb';
 import { UserSignUpBody } from './auth.model.js';
 import { User } from './auth.model.js';
 
-async function createUser(userCollection: Collection<User>, body: UserSignUpBody): Promise<void> {
+async function createUser(userCollection: Collection<User>, body: UserSignUpBody): Promise<User> {
     const { userName, email, password, firstName, lastName } = body;
-    await userCollection.insertOne({
+
+    const newUser: User = {
+        _id: new ObjectId(),
         userName: userName,
         email: email,
         password: password,
         fullName: firstName + ' ' + lastName,
-    });
+    };
+
+    await userCollection.insertOne(newUser);
+    return newUser;
 }
 
 async function findUserByEmail(
     userCollection: Collection<User>,
     email: string,
-): Promise<WithId<User> | null> {
+): Promise<User | null> {
     try {
-        const user: WithId<User> | null = await userCollection.findOne({ email: email });
+        const user: User | null = await userCollection.findOne({ email: email });
         return user;
     } catch (error) {
         return null;
     }
 }
 
-async function validatePassword(user: WithId<User>, password: string): Promise<boolean> {
+async function validatePassword(user: User, password: string): Promise<boolean> {
     try {
         return user.password === password;
     } catch (error) {

@@ -63,8 +63,9 @@ export class MongoDB {
      * @returns rateMyDineDB MongoDB Database.
      */
     public static getRateMyDineDB(): Db {
-        if (!MongoDB.rateMyDineDB)
+        if (!MongoDB.rateMyDineDB) {
             throw new Error('Mongo ratemyDine Database does not exist yet...');
+        }
         return MongoDB.rateMyDineDB;
     }
 

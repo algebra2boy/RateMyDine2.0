@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb';
+
 export interface UserSignUpBody {
     userName: string;
     email: string;
@@ -7,6 +9,7 @@ export interface UserSignUpBody {
 }
 
 export interface User {
+    _id: ObjectId;
     userName: string;
     email: string;
     password: string;

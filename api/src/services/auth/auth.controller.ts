@@ -16,9 +16,9 @@ import { User } from './auth.model.js';
  * @return a json body with message indicating whether login is successful
  */
 const login = async (req: Request, res: Response) => {
-    const UserCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
+    const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
 
-    const user = await userService.findUserByEmail(UserCollection, req.body.email);
+    const user = await userService.findUserByEmail(userCollection, req.body.email);
 
     if (!user) {
         return res.status(404).json({ message: `user with ${req.body.email} is not found` });
@@ -29,7 +29,7 @@ const login = async (req: Request, res: Response) => {
     if (!isPasswordCorrect) {
         res.status(401).json({ message: `user with ${req.body.email} has incorrect password` });
     } else {
-        res.status(201).json({ message: `successfully login` });
+        res.status(200).json({ user });
     }
 };
 
@@ -37,27 +37,22 @@ const login = async (req: Request, res: Response) => {
  * Sign up a user
  * @authentication none
  * @route {POST} /api/auth/signup
- * @bodyparam
- *  - userName {string} : the name of user
- *  - email {string}: the email of user
- *  - password {string}: the password of user
- *  - firstName {string}: the first name of user
- *  - lastName {string}: the last name of user
+ * @bodyparam body UserSignUpBody
  * @return a json body with message indicating whether sign up is successful
  */
 const signUp = async (req: Request, res: Response) => {
-    const UserCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
+    const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
 
-    const user = await userService.findUserByEmail(UserCollection, req.body.email);
+    const existingUser = await userService.findUserByEmail(userCollection, req.body.email);
 
-    if (user) {
+    if (existingUser) {
         // 403: Forbidden, server understands the request but refuses to authorize it.
         return res.status(403).json({ message: `user with ${req.body.email} is already existed` });
     }
 
     try {
-        await userService.createUser(UserCollection, req.body);
-        res.status(201).json({ message: 'succesfully created an user' });
+        const user = await userService.createUser(userCollection, req.body);
+        res.status(201).json({ user });
     } catch (error) {
         res.status(500).send({ status: 'failure' });
     }

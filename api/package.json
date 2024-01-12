@@ -5,6 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
+    "build": "tsc",
     "start:docker": "pm2-runtime start src/server.ts --name backend -i 5",
     "start": "ts-node src/server.ts",
     "dev": "nodemon src/server.ts",

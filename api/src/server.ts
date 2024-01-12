@@ -11,23 +11,29 @@ dotenv.config();
 
 const app = express();
 
+/**
+ * Dependencies configurations
+ */
+
+app.use(morgan('dev'));
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use('/api', routes);
+
 app.get('/', (req: Request, res: Response) => {
     res.status(201).json({ message: 'hello' });
 });
 
-/*
-	Dependencies configurations
-*/
-
-app.use(morgan('dev'));
-app.use(helmet());
-app.use(cors({ origin: 'http://localhost:8080', credentials: true }));
-app.use(express.json());
-app.use('/api', routes);
-
 // Establish mongodb connection
-MongoDB.getInstance().runServer();
+// MongoDB.getInstance().runServer();
 
-app.listen(8080, () => {
-    console.log('the server is running on port 8080');
+/**
+ * Server Listening for connections
+ */
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`the server is running on port ${PORT}`);
 });

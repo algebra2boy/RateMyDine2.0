@@ -1,8 +1,8 @@
 import express from 'express';
 import * as authContoller from './auth.controller.js';
 
-import { ZodMiddleware } from '../../middlewares/ZodValidation.js';
-import { LoginSchema, SignUpSchema } from '../../validations/authValidation.js';
+import { ZodMiddleware } from '../../middlewares/ZodValidation.mw.js';
+import { LoginSchema, SignUpSchema } from '../../validations/auth.validation.js';
 
 const router = express.Router();
 

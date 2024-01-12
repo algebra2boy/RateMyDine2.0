@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 
 /**
- * This middleware will intercept the error from the `express-jwt`
- * instead of returning the entire error log back, we return our own custom
+ * This middleware will intercept the error from the `express-jwt`.
+ * Instead of returning the entire error log back, we return our own custom
  * message and error back to the client.
  */
 const ErrorMiddleware = (error: Error, req: Request, res: Response, next: NextFunction) => {

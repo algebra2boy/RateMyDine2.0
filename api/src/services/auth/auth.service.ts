@@ -1,8 +1,12 @@
 import { Collection, ObjectId } from 'mongodb';
 import { UserSignUpBody } from './auth.model.js';
-import { User } from './auth.model.js';
+import { User, UserWithToken } from './auth.model.js';
+import { generateToken } from '../../utils/jwt.utils.js';
 
-async function createUser(userCollection: Collection<User>, body: UserSignUpBody): Promise<User> {
+async function createUser(
+    userCollection: Collection<User>,
+    body: UserSignUpBody,
+): Promise<UserWithToken> {
     const { userName, email, password, firstName, lastName } = body;
 
     const newUser: User = {
@@ -14,16 +18,26 @@ async function createUser(userCollection: Collection<User>, body: UserSignUpBody
     };
 
     await userCollection.insertOne(newUser);
-    return newUser;
+
+    return {
+        ...newUser,
+        token: generateToken(newUser._id),
+    };
 }
 
 async function findUserByEmail(
     userCollection: Collection<User>,
     email: string,
-): Promise<User | null> {
+): Promise<UserWithToken | null> {
     try {
         const user: User | null = await userCollection.findOne({ email: email });
-        return user;
+
+        if (!user) return null;
+
+        return {
+            ...user,
+            token: generateToken(user._id),
+        };
     } catch (error) {
         return null;
     }

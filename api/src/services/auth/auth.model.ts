@@ -15,3 +15,7 @@ export interface User {
     password: string;
     fullName: string;
 }
+
+export interface UserWithToken extends User {
+    token: string;
+}

@@ -29,7 +29,7 @@ app.get('/', (req: Request, res: Response) => {
 // Establish mongodb connection
 await MongoDB.getInstance().runServer();
 
-// app.use(ErrorMiddleware);
+app.use(ErrorMiddleware);
 
 /**
  * Server Listening for connections

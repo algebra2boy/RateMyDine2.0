@@ -4,11 +4,10 @@ import helmet from 'helmet';
 import cors from 'cors';
 import 'dotenv/config';
 
-
 import { MongoDB } from './configs/mongodb.js';
 import routes from './routes/routes.js';
-import ErrorMiddleware from './middlewares/Error.mw.js';
-
+import errorMiddleware from './middlewares/Error.mw.js';
+import morganMiddleware from './middlewares/Morgan.mw.js';
 
 const app = express();
 
@@ -17,9 +16,11 @@ const app = express();
  */
 
 app.use(morgan('dev'));
+app.use(morganMiddleware);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(errorMiddleware);
 app.use(routes);
 
 app.get('/', (req: Request, res: Response) => {
@@ -28,8 +29,6 @@ app.get('/', (req: Request, res: Response) => {
 
 // Establish mongodb connection
 await MongoDB.getInstance().runServer();
-
-app.use(ErrorMiddleware);
 
 /**
  * Server Listening for connections

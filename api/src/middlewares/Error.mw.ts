@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 interface jwtError extends Error {
-    inner: { "message": string }
+    inner: { message: string };
 }
 
 /**
@@ -13,7 +13,7 @@ const ErrorMiddleware = (error: jwtError, req: Request, res: Response, next: Nex
     if (error && error.name === 'UnauthorizedError') {
         return res.status(401).json({
             message: error.inner.message,
-            status: 'error'
+            status: 'error',
         });
     } else if (error) {
         return res.status(500).json(error.message);

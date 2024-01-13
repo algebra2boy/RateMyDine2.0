@@ -6,7 +6,6 @@ import { expressjwt } from 'express-jwt';
  */
 const jwtMiddleware = {
     required: expressjwt({
-        // TODO: process.env.JWT_SECRET does not exist here, why???
         secret: process.env.JWT_SECRET || 'secretCat', // secret key to encode jwt
         algorithms: ['HS256'], // specify the algorithm
     }),
@@ -16,5 +15,7 @@ const jwtMiddleware = {
         credentialsRequired: false,
     }),
 };
+console.log("running from middleware");
+console.log(process.env.JWT_SECRET);
 
 export default jwtMiddleware;

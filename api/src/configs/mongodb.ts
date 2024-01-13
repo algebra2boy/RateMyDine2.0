@@ -7,8 +7,8 @@ import { MongoClient, ServerApiVersion, Db } from 'mongodb';
  * import { MongoDB } from './configs/mongodb.js';
  * import { Db, Collection } from 'mongodb';
  *
- * // Start running the server, only used once
- * MongoDB.getInstance().runServer()
+ * // Start running the server, only used once in the entire app
+ * await MongoDB.getInstance().runServer()
  *
  * // How to retrieve the rateMyDine Database
  * const database: Db = MongoDB.getRateMyDineDB()

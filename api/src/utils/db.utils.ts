@@ -1,5 +1,5 @@
 import { MongoDB } from "../configs/mongodb.js";
-await MongoDB.getInstance().runServer();
+
 interface Review{
     FoodQuality:string, 
     CustomerService:string, 
@@ -9,7 +9,6 @@ interface Review{
     Taste:string,
     ReviewDescription: string
 }
-const database = MongoDB.getRateMyDineDB()
 
 /**
  * Compute the overall stars that is the average of other six fields.
@@ -30,6 +29,7 @@ function computeOverall(foodReview : Review) {
  */
 async function createReview(diningHall:string, review:Review, username:string) {
     try {
+        const database = MongoDB.getRateMyDineDB();
         const document = await database.collection("reviews").findOne( { "DiningHall": diningHall } ); // gets the document with id matching the dining hall.
         const overall  = computeOverall(review); // computes the average
         
@@ -73,6 +73,7 @@ async function createReview(diningHall:string, review:Review, username:string) {
  */
 async function getReview(diningHall:string) {
     try {
+        const database = MongoDB.getRateMyDineDB();
         const result = await database.collection("reviews").findOne( { "DiningHall": diningHall } ); // gets the document from the db
         const response = []
         for(const comment of result!== null ?result.Reviews:[]) {

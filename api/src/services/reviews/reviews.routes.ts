@@ -3,25 +3,22 @@ import { MongoDB } from "../../configs/mongodb.js";
 import * as dbUtils from "../../utils/db.utils.js";
 
 const reviewRouter = express.Router();
-const server = MongoDB.getRateMyDineDB();
-
 
 // retrieve dining hall info such as name and count of reviews
 reviewRouter.get("/diningInfo", async (req, res) => {
-    const diningInfo = await server.collection("diningInfo").find({}).toArray();
+    const collection = MongoDB.getRateMyDineDB().collection("diningInfo");
+    const diningInfo = await collection.find({}).toArray();
+
     res.send(diningInfo);
 });
 
-// // render the dining hall page
-// reviewRouter.get("/:diningHall", (req, res) => {
-//     res.sendFile("./client/HTML/dining.html", { root: "./" });
-// });
 
 // retrieve dining info 
 reviewRouter.get("/info/:diningHall", async (req, res) => {
     // grabs the dining hall name from the URL
     const diningName   = req.params.diningHall;
-    const diningInfo = await server.collection("diningInfo").findOne({"name": diningName});
+    const collection = MongoDB.getRateMyDineDB().collection("diningInfo");
+    const diningInfo = await collection.findOne({"name": diningName});
     // Dining Hall information doesn't exist
     if (diningInfo === null) {
         res.status(404).send({

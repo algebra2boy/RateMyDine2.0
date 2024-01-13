@@ -89,95 +89,100 @@ async function getReview(diningHall:string) {
     }
 }
 
-// /**
-//  * update an existing food review for a dining hall and returns it to the front-end.
-//  * @param  {string} diningHall        - the name of the diningName, ex "Worcester"
-//  * @param  {Review Object} foodReview - the review of the food 
-//  * @param  {string} foodReviewID      - the food review ID
-//  * @return {boolean}                  = whether the foodReviewID exists in db
-//  */
+/**
+ * update an existing food review for a dining hall and returns it to the front-end.
+ * @param  {string} diningHall        - the name of the diningName, ex "Worcester"
+ * @param  {Review Object} foodReview - the review of the food 
+ * @param  {string} foodReviewID      - the food review ID
+ * @return {boolean}                  = whether the foodReviewID exists in db
+ */
 
-// async function updateReview(diningHall, foodReview, foodReviewID) {
-//     try {
+async function updateReview(diningHall:string, foodReview:string, foodReviewID:string) {
+    try {
+        const database = MongoDB.getRateMyDineDB();
+        const document = await database.collection("reviews").findOne( { "DiningHall" : diningHall } ); // gets the document of the dining hall.
 
-//         let document = await server.reviews.findOne( { "DiningHall" : diningHall } ); // gets the document of the dining hall.
+        // loops through the reviews of the dining hall and tries to find the matching post id.
+        for (let i = 0; i < (document !== null ? document["Reviews"].length : 0);i++) {
+            if (document !== null && document.Reviews[i].review_id === Number(foodReviewID)) { // if the id matches the query
+                const review = JSON.parse(foodReview); //parse the body passed in by the POST request.
+                for (const key in review) {
+                    document.Reviews[i][key] = review[key] === undefined ? document.reviews[i][key] : review[key]; // updates the review in the document if the property exists in the body passed from the POST request. Keeps it the same if undefined.
+                }
+                document.Reviews[i].overall = computeOverall(document.Reviews[i]); //recomputes overall with updated information
+                database.collection("reviews").updateOne({"DiningHall": diningHall}, {$set:{Reviews: document.Reviews}}, {upsert:true}); // PUTS the document back into the db as update.
+                return true;
+            }
+        }
+        return false;
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
 
-//         // loops through the reviews of the dining hall and tries to find the matching post id.
-//         for (let i = 0; i < document["Reviews"].length; i++) {
-//             if (document.Reviews[i].review_id === Number(foodReviewID)) { // if the id matches the query
-//                 let review = JSON.parse(foodReview); //parse the body passed in by the POST request.
-//                 for (let key in review) {
-//                     document.Reviews[i][key] = review[key] === undefined ? document.reviews[i][key] : review[key]; // updates the review in the document if the property exists in the body passed from the POST request. Keeps it the same if undefined.
-//                 }
-//                 document.Reviews[i].overall = computeOverall(document.Reviews[i]); //recomputes overall with updated information
-//                 server.reviews.updateOne({"DiningHall": diningHall}, {$set:{Reviews: document.Reviews}}, {upsert:true}); // PUTS the document back into the db as update.
-//                 return true;
-//             }
-//         }
-//         return false;
-//     }
-//     catch (error) {
-//         console.error(error);
-//     }
-// }
+/**
+ *  delete an existing food review for a dining hall and returns it to the front-end.
+ * @param  {string} diningHallName -  the name of the diningName, ex "worcester"
+ * @param  {string} foodReviewID   -  the food review ID
+ * @return {boolean} found          -  whether we found a review with the matching food review ID
+ */
+async function deleteReview(diningHall:string, foodReviewID:string) {
 
-// /**
-//  *  delete an existing food review for a dining hall and returns it to the front-end.
-//  * @param  {string} diningHallName -  the name of the diningName, ex "worcester"
-//  * @param  {string} foodReviewID   -  the food review ID
-//  * @return {boolean} found          -  whether we found a review with the matching food review ID
-//  */
-// async function deleteReview(diningHall, foodReviewID) {
+    const database = MongoDB.getRateMyDineDB();
+    const document = await database.collection("reviews").findOne( { "DiningHall": diningHall } ); // gets the dining hall requested in the body of the delete request
+    let found = false; // flag for loop
+    let i = undefined; // place holder
 
-//     let document = await server.reviews.findOne( { "DiningHall": diningHall } ); // gets the dining hall requested in the body of the delete request
-//     let found = false; // flag for loop
-//     let i = undefined; // place holder
+    for (i = 0; i < (document !== null ? document.Reviews.length : 0); i++) { // looping through the reviews of the dining hall for to find the corresponding id of the message to be deleted.
+        if (document !== null && document.Reviews[i].review_id === Number(foodReviewID)) {
+            found = true; //when found, set flag - break
+            break;
+        }
+    }
 
-//     for (i = 0; i < document.Reviews.length; i++) { // looping through the reviews of the dining hall for to find the corresponding id of the message to be deleted.
-//         if (document.Reviews[i].review_id === Number(foodReviewID)) {
-//             found = true; //when found, set flag - break
-//             break;
-//         }
-//     }
+    if (found && document !== null) { // if flag is set
+        document.Reviews.splice(i, 1); // remove the review from the reviews array.
+        await database.collection("reviews").updateOne({"DiningHall":diningHall}, {$set:{Reviews: document.Reviews}}, {upsert:true}); // PUT the updated document back into the database
+        await database.collection("diningInfo").updateOne({"name": diningHall}, {$set: {numReviews: document.Reviews.length}}, {upsert:true}) // update the count with the length of reviews array.
+    }
 
-//     if (found) { // if flag is set
-//         document.Reviews.splice(i, 1); // remove the review from the reviews array.
-//         await server.reviews.updateOne({"DiningHall":diningHall}, {$set:{Reviews: document.Reviews}}, {upsert:true}); // PUT the updated document back into the database
-//         await server.diningInfo.updateOne({"name": diningHall}, {$set: {numReviews: document.Reviews.length}}, {upsert:true}) // update the count with the length of reviews array.
-//     }
+    return found;
+}
 
-//     return found;
-// }
+/**
+ * find all the reviewID that belongs to the user
+ * @param  {string}  username          -  name of the user
+ * @return {Review Object[]} Reviews   -  an array of reviews that match with username 
+ */
+async function findAllReviews(username:string) {
 
-// /**
-//  * find all the reviewID that belongs to the user
-//  * @param  {string}  username          -  name of the user
-//  * @return {Review Object[]} Reviews   -  an array of reviews that match with username 
-//  */
-// async function findAllReviews(username) {
-//     let reviewsArrayBelongToUSER = [];
-//     let documents = await server.reviews.find({}).toArray();
-//     // iterate through each dining hall
-//     for (let i = 0; i < documents.length; ++i ) {
-//         const diningHall = documents[i];
-//         const reviewOfOneDiningHall = diningHall.Reviews;
+    const database = MongoDB.getRateMyDineDB();
+    const reviewsArrayBelongToUSER = [];
+    const documents = await database.collection("reviews").find({}).toArray();
+    // iterate through each dining hall
+    for (let i = 0; i < documents.length; ++i ) {
+        const diningHall = documents[i];
+        const reviewOfOneDiningHall = diningHall.Reviews;
 
-//         // iterate through each reviews in a dining hall
-//         for (let j = 0; j < reviewOfOneDiningHall.length; ++j) {
-//             const review  = reviewOfOneDiningHall[j];
-//             if (review["reviewer_name"] === username) {
+        // iterate through each reviews in a dining hall
+        for (let j = 0; j < reviewOfOneDiningHall.length; ++j) {
+            const review  = reviewOfOneDiningHall[j];
+            if (review["reviewer_name"] === username) {
                 
-//                 // deconstructing the review 
-//                 const { review_id, review_date, description, overall, FoodQuality, CustomerService, Atmosphere, Healthiness, SeatAvailability, Taste } = review;
-//                 const review_Date     = createRevDate(review_date);
-//                 const reviewObject  = new Review(review_id, review_Date , username, overall, description, 
-//                 FoodQuality, CustomerService, Atmosphere, Healthiness, SeatAvailability, Taste, diningHall.DiningHall);
-//                 reviewsArrayBelongToUSER.push(reviewObject);
-//             }
-//         }
-//     }
-//     return JSON.stringify(reviewsArrayBelongToUSER);
-// }
+                // deconstructing the review 
+                // const { review_id, review_date, description, overall, FoodQuality, CustomerService, Atmosphere, Healthiness, SeatAvailability, Taste } = review;
+                review.review_Date = createRevDate(review.review_date);
+                review.username = username;
+                review.location = diningHall.DiningHall;
+                // const reviewObject  = new Review(review_id, review_Date , username, overall, description, 
+                // FoodQuality, CustomerService, Atmosphere, Healthiness, SeatAvailability, Taste, diningHall.DiningHall);
+                reviewsArrayBelongToUSER.push(review);
+            }
+        }
+    }
+    return JSON.stringify(reviewsArrayBelongToUSER);
+}
 
 function createRevDate(rev_date:string) : string{
     const review_Date     = new Date(rev_date);
@@ -189,7 +194,7 @@ function createRevDate(rev_date:string) : string{
 export {
     createReview,
     getReview,
-    // updateReview,
-    // deleteReview,
-    // findAllReviews
+    updateReview,
+    deleteReview,
+    findAllReviews
 }

@@ -92,12 +92,12 @@ reviewRouter.get("/review/:dininghall", async (req, res) => {
 //     res.send(result);
 // });
 
-// // find all the review that belongs to the user
-// reviewRouter.get("/review/user/:username", async (req, res) => {
+// find all the review that belongs to the user
+reviewRouter.get("/review/user/:username", async (req, res) => {
 
-//     let username = req.params.username;
-//     let result   = await dbUtils.findAllReviews(username);
-//     res.send(result);
-// }) 
+    let username = req.params.username;
+    let result   = await dbUtils.findAllReviews(username);
+    res.send(result);
+}) 
 
 export default reviewRouter;

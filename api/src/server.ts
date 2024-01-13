@@ -27,7 +27,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Establish mongodb connection
-// await MongoDB.getInstance().runServer();
+await MongoDB.getInstance().runServer();
 
 // app.use(ErrorMiddleware);
 

@@ -2,9 +2,8 @@ import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import 'dotenv/config'
+import 'dotenv/config';
 
-// dotenv.config();
 
 import { MongoDB } from './configs/mongodb.js';
 import routes from './routes/routes.js';

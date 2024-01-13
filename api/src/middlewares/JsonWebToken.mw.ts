@@ -15,7 +15,5 @@ const jwtMiddleware = {
         credentialsRequired: false,
     }),
 };
-console.log("running from middleware");
-console.log(process.env.JWT_SECRET);
 
 export default jwtMiddleware;

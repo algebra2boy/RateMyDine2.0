@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { MongoDB } from '../../configs/mongodb.js';
-import { DiningInfo } from './reviews.model.js';
+import { DiningInfo} from './reviews.model.js';
 import { Collection } from 'mongodb';
 import * as reviewService from "./reviews.service.js"; 
 
@@ -45,8 +45,26 @@ const getReviewByDiningHall = async (req: Request, res: Response) => {
     res.send(document);
 }
 
+const createReviewForDiningHall = async (req: Request, res: Response) => {
+
+//     console.log(req.isAuthenticated());
+//     if (!req.isAuthenticated()) { // user is not authenticated
+//         res.status(401).json( { message: "user is not authorized to make a review", status : "failure" } );
+//         return;
+//     }
+
+//     // user is authenticated from here
+    const diningHallReview = req.body; // grabs the body from the post requests
+    const diningHallName   = req.params.diningHall;
+
+
+    const result = await reviewService.createReview(diningHallName, diningHallReview, "jcli47") as string;
+    res.send(result);
+}
+
 export {
     getAllDiningInfo,
     getDiningInfo,
-    getReviewByDiningHall
+    getReviewByDiningHall,
+    createReviewForDiningHall
 }

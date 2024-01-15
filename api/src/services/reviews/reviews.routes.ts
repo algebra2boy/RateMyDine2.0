@@ -1,11 +1,14 @@
 import express from 'express';
 import * as reviewController from "./reviews.controller.js";
+import ZodMW from '../../middlewares/ZodValidation.mw.js';
+import { reviewSchema } from '../../validations/reviews.validation.js';
 
 const reviewRouter = express.Router();
 
 reviewRouter.get('/diningInfo', reviewController.getAllDiningInfo);
 reviewRouter.get('/info/:diningHall', reviewController.getDiningInfo);
-reviewRouter.get('/review/:dininghall', reviewController.getReviewByDiningHall)
+reviewRouter.get('/:dininghall', reviewController.getReviewByDiningHall)
+reviewRouter.post("/:diningHall", ZodMW(reviewSchema), reviewController.createReviewForDiningHall);
 
 // // create a new food review for a particular dining hall
 // reviewRouter.post("/review/:diningHall", ValidateFoodReviewSchema,  async (req, res) => {

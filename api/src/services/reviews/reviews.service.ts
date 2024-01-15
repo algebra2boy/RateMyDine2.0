@@ -78,7 +78,7 @@ async function createReview(diningHall: string, review: Review, username: string
             },
         );
         const updatedInfoDoc = await database
-            .collection('diningInfo')
+            .collection('reviews')
             .findOne({ DiningHall: diningHall });
         return JSON.stringify(updatedInfoDoc);
     } catch (error) {

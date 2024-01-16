@@ -11,12 +11,23 @@ export interface DiningInfo {
     hours: [string];
 }
 
+type FeedbackScore = 1 | 2 | 3 | 4 | 5;
+
+export interface Feedback {
+    description: string;
+    foodQuality: FeedbackScore;
+    customerService: FeedbackScore;
+    atmosphere: FeedbackScore;
+    healthiness: FeedbackScore;
+    seatAvailability: FeedbackScore;
+    taste: FeedbackScore;
+}
+
 export interface Review {
-    FoodQuality: string;
-    CustomerService: string;
-    Atmosphere: string;
-    Healthiness: string;
-    SeatAvailability: string;
-    Taste: string;
-    ReviewDescription: string;
+    review_id: number;
+    review_date: string;
+    reviewer_name: string;
+    overall: number;
+    feedback: Feedback;
+    location: string;
 }

@@ -1,6 +1,6 @@
 import { z, ZodNumber } from 'zod';
 
-const FeedbackCriteria = (feedbackName: string): ZodNumber =>
+const feedbackCriteria = (feedbackName: string): ZodNumber =>
     z
         .number()
         .int(`${feedbackName} must be an integer`)
@@ -9,12 +9,12 @@ const FeedbackCriteria = (feedbackName: string): ZodNumber =>
 
 export const reviewSchema = z.object({
     body: z.object({
-        foodQuality: FeedbackCriteria('foodQuality'),
-        customerService: FeedbackCriteria('customerService'),
-        atmosphere: FeedbackCriteria('atmosphere'),
-        healthiness: FeedbackCriteria('healthiness'),
-        seatAvailability: FeedbackCriteria('seatAvailability'),
-        taste: FeedbackCriteria('taste'),
+        foodQuality: feedbackCriteria('foodQuality'),
+        customerService: feedbackCriteria('customerService'),
+        atmosphere: feedbackCriteria('atmosphere'),
+        healthiness: feedbackCriteria('healthiness'),
+        seatAvailability: feedbackCriteria('seatAvailability'),
+        taste: feedbackCriteria('taste'),
         description: z
             .string()
             .min(1, 'description should not be empty')

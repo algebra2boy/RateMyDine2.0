@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { MongoDB } from '../../configs/mongodb.js';
 import * as userService from './auth.service.js';
 
 // interface
 import { Collection } from 'mongodb';
 import { User } from './auth.model.js';
+import { HttpError } from '../../utils/httpError.utils.js';
 
 /**
  * Login for a user
@@ -15,21 +16,23 @@ import { User } from './auth.model.js';
  *  - password {string}: the password of user
  * @return a json body with message indicating whether login is successful
  */
-const login = async (req: Request, res: Response) => {
-    const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
+const login = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
 
-    const user = await userService.findUserByEmail(userCollection, req.body.email);
+        const user = await userService.findUserByEmail(userCollection, req.body.email);
 
-    if (!user) {
-        return res.status(404).json({ message: `user with ${req.body.email} is not found` });
-    }
+        const isPasswordCorrect: boolean = userService.validatePassword(user, req.body.password);
 
-    const isPasswordCorrect: boolean = await userService.validatePassword(user, req.body.password);
-
-    if (!isPasswordCorrect) {
-        res.status(401).json({ message: `user with ${req.body.email} has incorrect password` });
-    } else {
-        res.status(200).json({ user });
+        if (!isPasswordCorrect) {
+            throw new HttpError(401, {
+                message: `user with ${req.body.email} has incorrect password`,
+            });
+        } else {
+            res.status(200).json({ user });
+        }
+    } catch (error) {
+        next(error);
     }
 };
 
@@ -40,21 +43,20 @@ const login = async (req: Request, res: Response) => {
  * @bodyparam body UserSignUpBody
  * @return a json body with message indicating whether sign up is successful
  */
-const signUp = async (req: Request, res: Response) => {
-    const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
-
-    const existingUser = await userService.findUserByEmail(userCollection, req.body.email);
-
-    if (existingUser) {
-        // 403: Forbidden, server understands the request but refuses to authorize it.
-        return res.status(403).json({ message: `user with ${req.body.email} is already existed` });
-    }
-
+const signUp = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
+
+        const existingUser = await userService.findUserByEmail(userCollection, req.body.email);
+
+        if (existingUser) {
+            throw new HttpError(403, { message: `user with ${req.body.email} is already existed` });
+        }
+
         const user = await userService.createUser(userCollection, req.body);
         res.status(201).json({ user });
     } catch (error) {
-        res.status(500).send({ status: 'failure' });
+        next(error);
     }
 };
 

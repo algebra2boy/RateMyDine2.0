@@ -3,6 +3,7 @@ import { DiningHallReview, DiningInfo, Feedback, Review } from './reviews.model.
 import { createReviewDate } from '../../utils/date.utils.js';
 import { computeAverageScore } from '../../utils/computeScore.utils.js';
 import { Db, WithId } from 'mongodb';
+import { HttpError } from '../../utils/httpError.utils.js';
 
 /**
  * Adds a new review to the dining hall document in the database using user's feedback
@@ -20,7 +21,11 @@ export async function createReview(
         .collection<DiningHallReview>('reviews')
         .findOne({ DiningHall: diningHall });
 
-    if (!document) throw new Error(`${diningHall} does not exist in the reviews collection`);
+    if (!document) {
+        throw new HttpError(404, {
+            message: `${diningHall} does not exist in the reviews collection`,
+        });
+    }
 
     const reviews: Review[] = document.Reviews;
     const newFoodReview: Review = constructFoodReview(reviews, diningHall, feedback, username);
@@ -87,7 +92,11 @@ async function updateReviewCount(database: Db, diningHall: string): Promise<void
     const diningInfo = await database
         .collection<DiningInfo>('diningInfo')
         .findOne({ name: diningHall });
-    if (!diningInfo) throw new Error(`${diningHall} does not exist in the diningInfo collection`);
+    if (!diningInfo) {
+        throw new HttpError(404, {
+            message: `${diningHall} does not exist in the diningInfo collection`,
+        });
+    }
 
     const filter = { name: diningHall };
     const updateDoc = {
@@ -131,7 +140,11 @@ export async function updateReview(diningHall: string, feedback: Feedback, foodR
         .collection<DiningHallReview>('reviews')
         .findOne({ DiningHall: diningHall });
 
-    if (!document) throw new Error(`${diningHall} does not exist in the reviews collection`);
+    if (!document) {
+        throw new HttpError(404, {
+            message: `${diningHall} does not exist in the reviews collection`,
+        });
+    }
 
     // loops through the reviews of the dining hall and tries to find the matching post id.
     const reviews: Review[] = document.Reviews;
@@ -146,7 +159,9 @@ export async function updateReview(diningHall: string, feedback: Feedback, foodR
         }
     }
 
-    throw new Error(`review with reviewID ${foodReviewID} does exist in the database`);
+    throw new HttpError(404, {
+        message: `review with reviewID ${foodReviewID} does not exist in the database`,
+    });
 }
 
 /**

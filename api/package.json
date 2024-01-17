@@ -9,7 +9,7 @@
     "start:docker": "pm2-runtime start src/app/server.ts --name backend -i 5",
     "start": "ts-node src/app/server.ts",
     "dev": "nodemon src/app/server.ts",
-    "test": "jest app/tests",
+    "test": "jest src/tests",
     "format": "prettier --write src/ --config .prettierrc",
     "lint": "eslint src/ --config .eslintrc.json"
   },

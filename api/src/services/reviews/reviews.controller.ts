@@ -56,7 +56,7 @@ const createReviewForDiningHall = async (req: Request, res: Response) => {
         res.status(201).json(result);
     } catch (error) {
         // @ts-ignore
-        res.status(500).json({ "message": error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -73,7 +73,7 @@ const updateReviewForDiningHall = async (req: Request, res: Response) => {
         res.status(200).json(result);
     } catch (error) {
         // @ts-ignore
-        res.status(500).json({ "message": error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 

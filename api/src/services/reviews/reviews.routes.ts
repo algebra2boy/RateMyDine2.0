@@ -9,7 +9,11 @@ reviewRouter.get('/diningInfo', reviewController.getAllDiningInfo);
 reviewRouter.get('/info/:diningHall', reviewController.getDiningInfo);
 reviewRouter.get('/:dininghall', reviewController.getReviewByDiningHall);
 reviewRouter.post('/:diningHall', ZodMW(reviewSchema), reviewController.createReviewForDiningHall);
-reviewRouter.put('/:dininghall/:reviewID', ZodMW(reviewSchema), reviewController.updateReviewForDiningHall);
+reviewRouter.put(
+    '/:dininghall/:reviewID',
+    ZodMW(reviewSchema),
+    reviewController.updateReviewForDiningHall,
+);
 
 // // delete an existing food review for a particular dining hall
 // reviewRouter.delete("/review/:dininghall/:reviewID", async (req, res) => {
@@ -20,6 +24,5 @@ reviewRouter.put('/:dininghall/:reviewID', ZodMW(reviewSchema), reviewController
 //     let result = await dbUtils.deleteReview(diningHallName, foodReviewID);
 //     res.send(result);
 // });
-
 
 export default reviewRouter;

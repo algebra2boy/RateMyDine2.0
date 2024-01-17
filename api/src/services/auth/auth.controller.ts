@@ -16,7 +16,7 @@ import { HttpError } from '../../utils/httpError.utils.js';
  *  - password {string}: the password of user
  * @return a json body with message indicating whether login is successful
  */
-const login = async (req: Request, res: Response, next: NextFunction) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
 
@@ -43,7 +43,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
  * @bodyparam body UserSignUpBody
  * @return a json body with message indicating whether sign up is successful
  */
-const signUp = async (req: Request, res: Response, next: NextFunction) => {
+export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userCollection: Collection<User> = MongoDB.getRateMyDineDB().collection('users');
 
@@ -59,5 +59,3 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 };
-
-export { signUp, login };

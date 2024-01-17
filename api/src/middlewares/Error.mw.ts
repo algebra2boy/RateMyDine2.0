@@ -5,7 +5,7 @@ interface jwtError extends Error {
 }
 
 /**
- * This middleware will intercept the error from the `express-jwt`.
+ * This middleware will intercept the error from the `express-jwt` and other potential throwing errors.
  * Instead of returning the entire error log back, we return the specific
  * message and error back to the client.
  */

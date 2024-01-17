@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { MongoDB } from '../../configs/mongodb.js';
-import { DiningInfo, Review } from './reviews.model.js';
+import { DiningInfo, Feedback, Review } from './reviews.model.js';
 import { Collection } from 'mongodb';
 import * as reviewService from './reviews.service.js';
 
@@ -44,17 +44,43 @@ const getReviewByDiningHall = async (req: Request, res: Response) => {
     res.status(200).json(document);
 };
 
+/**
+ * Create a new food review for a dining hall
+ */
 const createReviewForDiningHall = async (req: Request, res: Response) => {
-    const diningHallReview = req.body;
+    const feedback: Feedback = req.body;
     const diningHallName: string = req.params.diningHall;
 
     try {
-        const result = await reviewService.createReview(diningHallName, diningHallReview, 'jcli47');
+        const result = await reviewService.createReview(diningHallName, feedback, 'jcli47');
         res.status(201).json(result);
     } catch (error) {
         // @ts-ignore
-        res.status(500).json(error.message);
+        res.status(500).json({ "message": error.message });
     }
 };
 
-export { getAllDiningInfo, getDiningInfo, getReviewByDiningHall, createReviewForDiningHall };
+/**
+ * update an existing food review for a particular dining hall
+ */
+const updateReviewForDiningHall = async (req: Request, res: Response) => {
+    const feedback: Feedback = req.body;
+    const diningHallName: string = req.params.dininghall;
+    const foodReviewID: string = req.params.reviewID;
+
+    try {
+        const result = await reviewService.updateReview(diningHallName, feedback, foodReviewID);
+        res.status(200).json(result);
+    } catch (error) {
+        // @ts-ignore
+        res.status(500).json({ "message": error.message });
+    }
+};
+
+export {
+    getAllDiningInfo,
+    getDiningInfo,
+    getReviewByDiningHall,
+    createReviewForDiningHall,
+    updateReviewForDiningHall,
+};

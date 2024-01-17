@@ -14,7 +14,9 @@ const ZodMiddleware = (schema: ZodSchema) => (req: Request, res: Response, next:
 
         next();
     } catch (error) {
-        return res.status(400).send((error as ZodError).issues.map(x => x.message));
+        return res.status(400).json({
+            "errors": (error as ZodError).issues.map(x => x.message)
+        });
     }
 };
 

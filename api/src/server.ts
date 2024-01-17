@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import compression from "compression";
+import compression from 'compression';
 import 'dotenv/config';
 
 import { MongoDB } from './configs/mongodb.js';

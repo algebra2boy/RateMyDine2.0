@@ -31,3 +31,9 @@ export interface Review {
     feedback: Feedback;
     location: string;
 }
+
+export interface DiningHallReview {
+    _id: ObjectId;
+    Reviews: Review[];
+    DiningHall: string;
+}

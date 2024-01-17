@@ -1,5 +1,5 @@
 import { MongoDB } from '../../configs/mongodb.js';
-import { Feedback, Review } from './reviews.model.js';
+import { DiningHallReview, DiningInfo, Feedback, Review } from './reviews.model.js';
 import { createReviewDate } from '../../utils/date.utils.js';
 import { computeAverageScore } from '../../utils/computeScore.utils.js';
 import { Db } from 'mongodb';
@@ -10,78 +10,109 @@ import { Db } from 'mongodb';
  * @param {Feedback} feedback - the user food feedback
  * @param {string} username - the user name
  */
-async function createReview(diningHall: string, feedback: Feedback, username: string) {
-    try {
-        // gets the review document matching the dining hall.
-        const database: Db = MongoDB.getRateMyDineDB();
-        const document = await database.collection('reviews').findOne({ DiningHall: diningHall });
+export async function createReview(diningHall: string, feedback: Feedback, username: string) {
+    const database: Db = MongoDB.getRateMyDineDB();
+    const document = await database
+        .collection<DiningHallReview>('reviews')
+        .findOne({ DiningHall: diningHall });
 
-        if (!document) return null;
+    if (!document) throw new Error(`${diningHall} does not exist in the reviews collection`);
 
-        const newFoodReview = constructFoodReview(document, feedback, username);
+    const reviews: Review[] = document.Reviews;
+    const newFoodReview: Review = constructFoodReview(reviews, diningHall, feedback, username);
 
-        document.Reviews.unshift(newFoodReview); // adds the new review object to the front of the reviews array.
+    await updateDiningHallDocument(database, diningHall, [newFoodReview, ...reviews]);
+    await updateReviewCount(database, diningHall);
 
-        // puts the updated dining hall doc in the review collection
-        const filter = { DiningHall: diningHall };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                Reviews: document !== null ? document.Reviews : [newFoodReview],
-            },
-        };
-        await database.collection('reviews').updateOne(filter, updateDoc, options);
-        // update the number of reviews in the diningInfo
-        const infoDoc = await database.collection('diningInfo').findOne({ name: diningHall });
-        await database.collection('diningInfo').updateOne(
-            { name: diningHall },
-            {
-                $set: { numReviews: infoDoc !== null ? infoDoc.numReviews + 1 : 1 },
-            },
-        );
-        const updatedInfoDoc = await database
-            .collection('reviews')
-            .findOne({ DiningHall: diningHall });
-        return JSON.stringify(updatedInfoDoc);
-    } catch (error) {
-        console.error(error);
-    }
+    const updatedReviews = await database
+        .collection<DiningHallReview>('reviews')
+        .findOne({ DiningHall: diningHall });
+    return updatedReviews;
 }
 
-function constructFoodReview(document: any, feedback: Feedback, username: string) {
+/**
+ * Constructs a food review using user's feedback
+ * @param {Review[]} reviews - all the reviews from the review collection for the diningHall
+ * @param {string} diningHall - the name of the dinningHall
+ * @param {Feedback} feedback - the user's feedback including foodQuality, customerService from the request body
+ * @param {string} username - the name of the reviewer
+ * @returns {Review} the review object
+ */
+function constructFoodReview(
+    reviews: Review[],
+    diningHall: string,
+    feedback: Feedback,
+    username: string,
+): Review {
     return {
-        review_id: document.Reviews[0] !== undefined ? document.Reviews[0]['review_id'] + 1 : 1,
+        review_id: reviews[0] ? reviews[0]['review_id'] + 1 : 1,
         review_date: new Date(Date.now()).toISOString(),
         reviewer_name: username,
         overall: computeAverageScore(feedback),
-        ...feedback,
+        feedback,
+        location: diningHall,
     };
+}
+
+/**
+ * Puts the updated dining hall document in the review collection
+ *
+ * @param {Db} database - The mongodb database for RateMyDine
+ * @param {string} diningHall - the name of the dining hall
+ * @param {Review[]} reviews - the updated version of review array
+ */
+async function updateDiningHallDocument(
+    database: Db,
+    diningHall: string,
+    reviews: Review[],
+): Promise<void> {
+    const filter = { DiningHall: diningHall }; // specify which dining hall we want to insert the new review to
+    // $set operator is used here to replace the value of the Reviews field with the new reveiws
+    const updateDoc = {
+        $set: { Reviews: reviews },
+    };
+    await database.collection('reviews').updateOne(filter, updateDoc);
+}
+
+/**
+ * Update the number of reviews in the diningInfo
+ * @param {Db} database -  The mongodb database for RateMyDine
+ * @param {string} diningHall - the name of the dining hall
+ */
+async function updateReviewCount(database: Db, diningHall: string): Promise<void> {
+    const diningInfo = await database
+        .collection<DiningInfo>('diningInfo')
+        .findOne({ name: diningHall });
+    if (!diningInfo) throw new Error(`${diningHall} does not exist in the diningInfo collection`);
+
+    const filter = { name: diningHall };
+    const updateDoc = {
+        $set: { numReviews: diningInfo.numReviews + 1 },
+    };
+
+    await database.collection('diningInfo').updateOne(filter, updateDoc);
 }
 
 /**
  * Gets all the reviews for a particular dining hall and returns it to the front-end.
  * @param  {string} diningHall - the name of the dinning hall.
- * @return {Review[]} review - reviews from all the diningHall.
+ * @return {Review[]} reviews from all the diningHall.
  */
-async function getReview(diningHall: string): Promise<Review[] | undefined> {
-    try {
-        // gets all the review document from the rateMyDine db for the dinning hall
-        const database: Db = MongoDB.getRateMyDineDB();
-        const result = await database.collection('reviews').findOne({ DiningHall: diningHall });
+export async function getReview(diningHall: string): Promise<Review[]> {
+    const database: Db = MongoDB.getRateMyDineDB();
+    const result = await database
+        .collection<DiningHallReview>('reviews')
+        .findOne({ DiningHall: diningHall });
 
-        if (!result || !result.Reviews) return [];
+    if (!result || !result.Reviews) return [];
 
-        // loop over every review for that dining hall
-        const review: Review[] = [];
-        for (const comment of result.Reviews) {
-            comment.review_date = createReviewDate(comment.review_date); // convert the date
-            comment.location = diningHall; // add location name to each comment
-            review.push(comment);
-        }
-        return review;
-    } catch (error) {
-        console.error(error);
+    // loop over every review for that dining hall
+    const review: Review[] = [];
+    for (const comment of result.Reviews) {
+        comment.review_date = createReviewDate(comment.review_date); // convert the date
+        review.push(comment);
     }
+    return review;
 }
 
 // /**
@@ -199,4 +230,3 @@ async function getReview(diningHall: string): Promise<Review[] | undefined> {
 
 // exporting the function for use in other js files
 // export { createReview, getReview, updateReview, deleteReview, findAllReviews };
-export { createReview, getReview };

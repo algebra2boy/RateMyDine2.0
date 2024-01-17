@@ -9,7 +9,7 @@ import * as reviewService from './reviews.service.js';
  */
 const getAllDiningInfo = async (req: Request, res: Response) => {
     const collection: Collection<DiningInfo> = MongoDB.getRateMyDineDB().collection('diningInfo');
-    const diningInfo: DiningInfo[] = await collection.find({}).toArray();
+    const diningInfo: DiningInfo[] = await collection.find<DiningInfo>({}).toArray();
 
     res.status(200).json(diningInfo);
 };
@@ -48,12 +48,13 @@ const createReviewForDiningHall = async (req: Request, res: Response) => {
     const diningHallReview = req.body;
     const diningHallName: string = req.params.diningHall;
 
-    const result = (await reviewService.createReview(
-        diningHallName,
-        diningHallReview,
-        'jcli47',
-    )) as string;
-    res.send(result);
+    try {
+        const result = await reviewService.createReview(diningHallName, diningHallReview, 'jcli47');
+        res.status(201).json(result);
+    } catch (error) {
+        // @ts-ignore
+        res.status(500).json(error.message);
+    }
 };
 
 export { getAllDiningInfo, getDiningInfo, getReviewByDiningHall, createReviewForDiningHall };

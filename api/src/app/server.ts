@@ -21,7 +21,7 @@ app.use(morganMiddleware);
 app.use(helmet());
 app.use(compression());
 app.use(cors());
-app.use(express.static("src/public")); // serve static files
+app.use(express.static('src/public')); // serve static files
 app.use(express.json());
 app.use(routes);
 app.use(errorMiddleware); // this must be placed at the end
@@ -31,7 +31,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Establish mongodb connection
-// await MongoDB.getInstance().runServer();
+await MongoDB.getInstance().runServer();
 
 /**
  * Server Listening for connections

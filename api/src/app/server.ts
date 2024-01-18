@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
+import status from 'http-status';
 import 'dotenv/config';
 
 import { MongoDB } from './configs/mongodb.js';
@@ -27,7 +28,7 @@ app.use(routes);
 app.use(errorMiddleware); // this must be placed at the end
 
 app.get('/', (req: Request, res: Response) => {
-    res.status(201).json({ message: 'hello' });
+    res.status(status.OK).json({ message: 'hello' });
 });
 
 // Establish mongodb connection

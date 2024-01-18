@@ -50,6 +50,9 @@ dependencies:
   helmet:
     specifier: ^7.1.0
     version: 7.1.0
+  http-status:
+    specifier: ^1.7.3
+    version: 1.7.3
   jsonwebtoken:
     specifier: ^9.0.2
     version: 9.0.2
@@ -2243,6 +2246,11 @@ packages:
       setprototypeof: 1.2.0
       statuses: 2.0.1
       toidentifier: 1.0.1
+    dev: false
+
+  /http-status@1.7.3:
+    resolution: {integrity: sha512-GS8tL1qHT2nBCMJDYMHGkkkKQLNkIAHz37vgO68XKvzv+XyqB4oh/DfmMHdtRzfqSJPj1xKG2TaELZtlCz6BEQ==}
+    engines: {node: '>= 0.4.0'}
     dev: false
 
   /human-signals@2.1.0:

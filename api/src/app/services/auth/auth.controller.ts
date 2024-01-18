@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
+import status from 'http-status';
+
 import { MongoDB } from '../../configs/mongodb.js';
 import * as userService from './auth.service.js';
 
@@ -25,11 +27,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         const isPasswordCorrect: boolean = userService.validatePassword(user, req.body.password);
 
         if (!isPasswordCorrect) {
-            throw new HttpError(401, {
+            throw new HttpError(status.UNAUTHORIZED, {
                 message: `user with ${req.body.email} has incorrect password`,
             });
         } else {
-            res.status(200).json({ user });
+            res.status(status.OK).json({ user });
         }
     } catch (error) {
         next(error);
@@ -50,11 +52,13 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         const existingUser = await userService.findUserByEmail(userCollection, req.body.email);
 
         if (existingUser) {
-            throw new HttpError(403, { message: `user with ${req.body.email} is already existed` });
+            throw new HttpError(status.FORBIDDEN, {
+                message: `user with ${req.body.email} is already existed`,
+            });
         }
 
         const user = await userService.createUser(userCollection, req.body);
-        res.status(201).json({ user });
+        res.status(status.CREATED).json({ user });
     } catch (error) {
         next(error);
     }

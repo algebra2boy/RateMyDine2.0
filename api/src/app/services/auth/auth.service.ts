@@ -1,4 +1,6 @@
 import { Collection, ObjectId } from 'mongodb';
+import status from 'http-status';
+
 import { UserSignUpBody } from './auth.model.js';
 import { User, UserWithToken } from './auth.model.js';
 import { generateToken } from '../../utils/jwt.utils.js';
@@ -32,7 +34,9 @@ async function findUserByEmail(
 ): Promise<UserWithToken> {
     const user: User | null = await userCollection.findOne({ email: email });
 
-    if (!user) throw new HttpError(404, { message: `user with ${email} is not found` });
+    if (!user) {
+        throw new HttpError(status.NOT_FOUND, { message: `user with ${email} is not found` });
+    }
 
     return {
         ...user,

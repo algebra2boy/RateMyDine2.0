@@ -1,8 +1,10 @@
+import { Db, WithId } from 'mongodb';
+import status from 'http-status';
+
 import { MongoDB } from '../../configs/mongodb.js';
 import { DiningHallReview, DiningInfo, Feedback, Review } from './reviews.model.js';
 import { createReviewDate } from '../../utils/date.utils.js';
 import { computeAverageScore } from '../../utils/computeScore.utils.js';
-import { Db, WithId } from 'mongodb';
 import { HttpError } from '../../utils/httpError.utils.js';
 
 /**
@@ -22,7 +24,7 @@ export async function createReview(
         .findOne({ DiningHall: diningHall });
 
     if (!document) {
-        throw new HttpError(404, {
+        throw new HttpError(status.NOT_FOUND, {
             message: `${diningHall} does not exist in the reviews collection`,
         });
     }
@@ -91,7 +93,7 @@ async function updateReviewCount(database: Db, diningHall: string): Promise<void
         .collection<DiningInfo>('diningInfo')
         .findOne({ name: diningHall });
     if (!diningInfo) {
-        throw new HttpError(404, {
+        throw new HttpError(status.NOT_FOUND, {
             message: `${diningHall} does not exist in the diningInfo collection`,
         });
     }
@@ -116,7 +118,9 @@ export async function getReview(diningHall: string): Promise<Review[]> {
         .findOne({ DiningHall: diningHall });
 
     if (!result || !result.Reviews)
-        throw new HttpError(404, { message: `server cannot find any reviews from ${diningHall}` });
+        throw new HttpError(status.NOT_FOUND, {
+            message: `server cannot find any reviews from ${diningHall}`,
+        });
 
     // loop over every review for that dining hall
     const review: Review[] = [];
@@ -144,7 +148,7 @@ export async function updateReview(
         .findOne({ DiningHall: diningHall });
 
     if (!document) {
-        throw new HttpError(404, {
+        throw new HttpError(status.NOT_FOUND, {
             message: `${diningHall} does not exist in the reviews collection`,
         });
     }
@@ -162,7 +166,7 @@ export async function updateReview(
         }
     }
 
-    throw new HttpError(404, {
+    throw new HttpError(status.NOT_FOUND, {
         message: `review with reviewID ${foodReviewID} does not exist in the database`,
     });
 }

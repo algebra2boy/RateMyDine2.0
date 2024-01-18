@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
+import status from 'http-status';
+
 import { HttpError } from '../utils/httpError.utils.js';
 
 interface JwtError extends Error {
@@ -12,7 +14,7 @@ interface JwtError extends Error {
  */
 const ErrorMiddleware = (error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error && error.name === 'UnauthorizedError') {
-        res.status(401).json({
+        res.status(status.UNAUTHORIZED).json({
             message: (error as JwtError).inner.message,
             status: 'failure',
         });
@@ -22,7 +24,7 @@ const ErrorMiddleware = (error: Error, req: Request, res: Response, next: NextFu
             status: 'failure',
         });
     } else if (error) {
-        res.status(500).json({
+        res.status(status.INTERNAL_SERVER_ERROR).json({
             message: error.message,
             status: 'failure',
         });

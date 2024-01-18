@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
+import { Collection } from 'mongodb';
+import status from 'http-status';
+
 import { MongoDB } from '../../configs/mongodb.js';
 import { DiningInfo, Feedback, Review } from './reviews.model.js';
-import { Collection } from 'mongodb';
 import * as reviewService from './reviews.service.js';
 import { HttpError } from '../../utils/httpError.utils.js';
 
@@ -14,7 +16,7 @@ const getAllDiningInfo = async (req: Request, res: Response, next: NextFunction)
             MongoDB.getRateMyDineDB().collection('diningInfo');
         const diningInfo: DiningInfo[] = await collection.find<DiningInfo>({}).toArray();
 
-        res.status(200).json(diningInfo);
+        res.status(status.OK).json(diningInfo);
     } catch (error) {
         next(error);
     }
@@ -33,11 +35,11 @@ const getDiningInfo = async (req: Request, res: Response, next: NextFunction) =>
 
         // Dining Hall information doesn't exist
         if (!diningInfo) {
-            throw new HttpError(404, {
+            throw new HttpError(status.NOT_FOUND, {
                 message: `${diningName} is not found in the database`,
             });
         }
-        res.status(200).json(diningInfo);
+        res.status(status.OK).json(diningInfo);
     } catch (error) {
         next(error);
     }
@@ -51,7 +53,7 @@ const getReviewByDiningHall = async (req: Request, res: Response, next: NextFunc
         const diningHallName: string = req.params.dininghall;
         const document: Review[] | undefined = await reviewService.getReview(diningHallName);
 
-        res.status(200).json(document);
+        res.status(status.OK).json(document);
     } catch (error) {
         next(error);
     }
@@ -66,7 +68,7 @@ const createReviewForDiningHall = async (req: Request, res: Response, next: Next
 
     try {
         const result = await reviewService.createReview(diningHallName, feedback, 'jcli47');
-        res.status(201).json(result);
+        res.status(status.OK).json(result);
     } catch (error) {
         next(error);
     }
@@ -82,7 +84,7 @@ const updateReviewForDiningHall = async (req: Request, res: Response, next: Next
 
     try {
         const result = await reviewService.updateReview(diningHallName, feedback, foodReviewID);
-        res.status(200).json(result);
+        res.status(status.OK).json(result);
     } catch (error) {
         next(error);
     }

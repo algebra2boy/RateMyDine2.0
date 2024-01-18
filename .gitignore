@@ -3,3 +3,8 @@
 
 **/.svelte-kit
 **/build
+**/dist
+
+.env
+
+**/logs

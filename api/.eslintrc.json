@@ -16,7 +16,6 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "no-unused-vars": 1,
         "prefer-const": 1,
         "no-var": 1,
         "no-useless-return": 1,

@@ -76,10 +76,8 @@ async function updateDiningHallDocument(
     reviews: Review[],
 ): Promise<void> {
     const filter = { DiningHall: diningHall }; // specify which dining hall we want to insert the new review to
-    // $set operator is used here to replace the value of the Reviews field with the new reveiws
-    const updateDoc = {
-        $set: { Reviews: reviews },
-    };
+    const updateDoc = { $set: { Reviews: reviews } }; // $set operator is used here to replace the value of the Reviews field with the new reviews
+
     await database.collection('reviews').updateOne(filter, updateDoc);
 }
 
@@ -117,7 +115,8 @@ export async function getReview(diningHall: string): Promise<Review[]> {
         .collection<DiningHallReview>('reviews')
         .findOne({ DiningHall: diningHall });
 
-    if (!result || !result.Reviews) return [];
+    if (!result || !result.Reviews)
+        throw new HttpError(404, { message: `server cannot find any reviews from ${diningHall}` });
 
     // loop over every review for that dining hall
     const review: Review[] = [];
@@ -134,7 +133,11 @@ export async function getReview(diningHall: string): Promise<Review[]> {
  * @param  {Feedback} feedback - the user's feedback including foodQuality, customerService
  * @param  {string} foodReviewID - the food review ID
  */
-export async function updateReview(diningHall: string, feedback: Feedback, foodReviewID: string) {
+export async function updateReview(
+    diningHall: string,
+    feedback: Feedback,
+    foodReviewID: string,
+): Promise<void> {
     const database: Db = MongoDB.getRateMyDineDB();
     const document = await database
         .collection<DiningHallReview>('reviews')

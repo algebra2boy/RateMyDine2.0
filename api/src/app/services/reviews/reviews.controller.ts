@@ -3,6 +3,7 @@ import { MongoDB } from '../../configs/mongodb.js';
 import { DiningInfo, Feedback, Review } from './reviews.model.js';
 import { Collection } from 'mongodb';
 import * as reviewService from './reviews.service.js';
+import { HttpError } from '../../utils/httpError.utils.js';
 
 /**
  * Retrieve dining hall info such as name and count of reviews.
@@ -32,7 +33,7 @@ const getDiningInfo = async (req: Request, res: Response, next: NextFunction) =>
 
         // Dining Hall information doesn't exist
         if (!diningInfo) {
-            return res.status(404).json({
+            throw new HttpError(404, {
                 message: `${diningName} is not found in the database`,
             });
         }

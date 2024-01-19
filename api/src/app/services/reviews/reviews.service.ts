@@ -1,4 +1,4 @@
-import { Db, WithId } from 'mongodb';
+import { Collection, Db, WithId } from 'mongodb';
 import status from 'http-status';
 
 import { MongoDB } from '../../configs/mongodb.js';
@@ -6,6 +6,25 @@ import { DiningHallReview, DiningInfo, Feedback, Review } from './reviews.model.
 import { createReviewDate } from '../../utils/date.utils.js';
 import { computeAverageScore } from '../../utils/computeScore.utils.js';
 import { HttpError } from '../../utils/httpError.utils.js';
+
+/**
+ * Get the information about a dining info.
+ * @param {string} diningHall - the name of the dining hall
+ * @returns {Promise<DiningInfo>} the dining hall info document
+ */
+export async function findDiningInfo(diningHall: string): Promise<DiningInfo> {
+    const collection: Collection<DiningInfo> = MongoDB.getRateMyDineDB().collection('diningInfo');
+    const diningInfo: DiningInfo | null = await collection.findOne({ name: diningHall });
+
+    // Dining Hall information doesn't exist
+    if (!diningInfo) {
+        throw new HttpError(status.NOT_FOUND, {
+            message: `${diningHall} does not exist in the diningInfo collection`,
+        });
+    }
+
+    return diningInfo;
+}
 
 /**
  * Adds a new review to the dining hall document in the database using user's feedback
@@ -89,14 +108,7 @@ async function updateDiningHallDocument(
  * @param {string} diningHall - the name of the dining hall
  */
 async function updateReviewCount(database: Db, diningHall: string): Promise<void> {
-    const diningInfo = await database
-        .collection<DiningInfo>('diningInfo')
-        .findOne({ name: diningHall });
-    if (!diningInfo) {
-        throw new HttpError(status.NOT_FOUND, {
-            message: `${diningHall} does not exist in the diningInfo collection`,
-        });
-    }
+    const diningInfo: DiningInfo = await findDiningInfo(diningHall);
 
     const filter = { name: diningHall };
     const updateDoc = {
@@ -117,10 +129,11 @@ export async function getReview(diningHall: string): Promise<Review[]> {
         .collection<DiningHallReview>('reviews')
         .findOne({ DiningHall: diningHall });
 
-    if (!result || !result.Reviews)
+    if (!result || !result.Reviews) {
         throw new HttpError(status.NOT_FOUND, {
             message: `server cannot find any reviews from ${diningHall}`,
         });
+    }
 
     // loop over every review for that dining hall
     const review: Review[] = [];
@@ -136,12 +149,13 @@ export async function getReview(diningHall: string): Promise<Review[]> {
  * @param  {string} diningHall - the name of the diningName, ex "Worcester"
  * @param  {Feedback} feedback - the user's feedback including foodQuality, customerService
  * @param  {string} foodReviewID - the food review ID
+ * @return {Review} the new updated review
  */
 export async function updateReview(
     diningHall: string,
     feedback: Feedback,
     foodReviewID: string,
-): Promise<void> {
+): Promise<Review> {
     const database: Db = MongoDB.getRateMyDineDB();
     const document = await database
         .collection<DiningHallReview>('reviews')
@@ -161,8 +175,10 @@ export async function updateReview(
         if (review.review_id === Number(foodReviewID)) {
             review.feedback = feedback; // replace the old feedback with new feedback
             review.overall = computeAverageScore(feedback); // recomputes overall with updated information
+
             await updateReiewCollection(database, diningHall, reviews);
-            return;
+
+            return review;
         }
     }
 

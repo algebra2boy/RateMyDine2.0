@@ -5,10 +5,9 @@ import status from 'http-status';
 import { MongoDB } from '../../configs/mongodb.js';
 import { DiningInfo, Feedback, Review } from './reviews.model.js';
 import * as reviewService from './reviews.service.js';
-import { HttpError } from '../../utils/httpError.utils.js';
 
 /**
- * Retrieve dining hall info such as name and count of reviews.
+ * Retrieve every dining hall info such as name and count of reviews.
  */
 const getAllDiningInfo = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -23,22 +22,13 @@ const getAllDiningInfo = async (req: Request, res: Response, next: NextFunction)
 };
 
 /**
- * retrieve one dining info
+ * retrieve one dining hall info such as name and count of reviews.
  */
 const getDiningInfo = async (req: Request, res: Response, next: NextFunction) => {
     const diningName: string = req.params.diningHall;
 
     try {
-        const collection: Collection<DiningInfo> =
-            MongoDB.getRateMyDineDB().collection('diningInfo');
-        const diningInfo: DiningInfo | null = await collection.findOne({ name: diningName });
-
-        // Dining Hall information doesn't exist
-        if (!diningInfo) {
-            throw new HttpError(status.NOT_FOUND, {
-                message: `${diningName} is not found in the database`,
-            });
-        }
+        const diningInfo = reviewService.findDiningInfo(diningName);
         res.status(status.OK).json(diningInfo);
     } catch (error) {
         next(error);
@@ -49,10 +39,10 @@ const getDiningInfo = async (req: Request, res: Response, next: NextFunction) =>
  * get all the food review from a particular dining hall
  */
 const getReviewByDiningHall = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const diningHallName: string = req.params.dininghall;
-        const document: Review[] | undefined = await reviewService.getReview(diningHallName);
+    const diningHallName: string = req.params.dininghall;
 
+    try {
+        const document: Review[] = await reviewService.getReview(diningHallName);
         res.status(status.OK).json(document);
     } catch (error) {
         next(error);

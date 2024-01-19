@@ -1,7 +1,7 @@
-import { ObjectId } from 'mongodb';
+import { WithId } from 'mongodb';
 
-export interface DiningInfo {
-    _id: ObjectId;
+// extends to WithID<Document> automatically includes the _id field
+export interface DiningInfo extends WithId<Document> {
     address: string;
     phone: string;
     description: string;
@@ -32,8 +32,7 @@ export interface Review {
     location: string;
 }
 
-export interface DiningHallReview {
-    _id: ObjectId;
+export interface DiningHallReview extends WithId<Document> {
     Reviews: Review[];
     DiningHall: string;
 }

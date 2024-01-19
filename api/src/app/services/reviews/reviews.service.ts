@@ -1,4 +1,4 @@
-import { Collection, Db, WithId } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 import status from 'http-status';
 
 import { MongoDB } from '../../configs/mongodb.js';
@@ -9,19 +9,20 @@ import { HttpError } from '../../utils/httpError.utils.js';
 
 /**
  * Get the information about every dining hall info.
- * @returns {Promise<DiningInfo[]>} the dining hall info document
+ * @returns {Promise<DiningInfo[]>} an array of dining hall info document
  */
 export async function findAllDiningInfo(): Promise<DiningInfo[]> {
     const collection: Collection<DiningInfo> = MongoDB.getRateMyDineDB().collection('diningInfo');
-    const diningInfo: DiningInfo[] = await collection.find<DiningInfo>({}).toArray();
+    const diningInfo: DiningInfo[] = await collection.find({}).toArray();
 
     return diningInfo;
 }
 
 /**
- * Get the information about a dining info.
- * @param {string} diningHall - the name of the dining hall
- * @returns {Promise<DiningInfo>} the dining hall info document
+ * Get the information about a dining hall info.
+ * @param {string} diningHall - the name of the dining hall.
+ * @returns {Promise<DiningInfo>} the dining hall info document.
+ * @throws {HttpError} Throws an error if dining hall does not exist.
  */
 export async function findDiningInfo(diningHall: string): Promise<DiningInfo> {
     const collection: Collection<DiningInfo> = MongoDB.getRateMyDineDB().collection('diningInfo');
@@ -38,16 +39,18 @@ export async function findDiningInfo(diningHall: string): Promise<DiningInfo> {
 }
 
 /**
- * Adds a new review to the dining hall document in the database using user's feedback
+ * Adds a new review to the dining hall in the database using user's feedback and name
  * @param {string} diningHall - the name of the dining hall
  * @param {Feedback} feedback - the user food feedback
  * @param {string} username - the user name
+ * @returns {Promise<DiningHallReview | null>} the dining hall info review document
+ * @throws {HttpError} Throws an error if dining hall does not exist.
  */
 export async function createReview(
     diningHall: string,
     feedback: Feedback,
     username: string,
-): Promise<WithId<DiningHallReview> | null> {
+): Promise<DiningHallReview | null> {
     const database: Db = MongoDB.getRateMyDineDB();
     const document = await database
         .collection<DiningHallReview>('reviews')
@@ -72,12 +75,12 @@ export async function createReview(
 }
 
 /**
- * Constructs a food review using user's feedback
- * @param {Review[]} reviews - all the reviews from the review collection for the diningHall
- * @param {string} diningHall - the name of the dinningHall
- * @param {Feedback} feedback - the user's feedback including foodQuality, customerService from the request body
- * @param {string} username - the name of the reviewer
- * @returns {Review} the review object
+ * Constructs a food review using user's feedback.
+ * @param {Review[]} reviews - all the reviews from the review collection for the diningHall.
+ * @param {string} diningHall - the name of the dinningHall.
+ * @param {Feedback} feedback - the user's feedback including foodQuality, customerService from the request body.
+ * @param {string} username - the name of the reviewer.
+ * @returns {Review} the review object.
  */
 function constructFoodReview(
     reviews: Review[],
@@ -132,7 +135,8 @@ async function updateReviewCount(database: Db, diningHall: string): Promise<void
 /**
  * Gets all the reviews for a particular dining hall and returns it to the front-end.
  * @param  {string} diningHall - the name of the dinning hall.
- * @return {Review[]} reviews from all the diningHall.
+ * @return {Promise<Review[]>} reviews from all the diningHall.
+ * @throws {HttpError} Throws an error if cannot find any review.
  */
 export async function getReview(diningHall: string): Promise<Review[]> {
     const database: Db = MongoDB.getRateMyDineDB();
@@ -161,6 +165,7 @@ export async function getReview(diningHall: string): Promise<Review[]> {
  * @param  {Feedback} feedback - the user's feedback including foodQuality, customerService
  * @param  {string} foodReviewID - the food review ID
  * @return {Promise<Review>} the new updated review
+ * @throws {HttpError} Throws an error if dining hall does not exist.
  */
 export async function updateReview(
     diningHall: string,
@@ -188,7 +193,6 @@ export async function updateReview(
             review.overall = computeAverageScore(feedback); // recomputes overall with updated information
 
             await updateReiewCollection(database, diningHall, reviews);
-
             return review;
         }
     }

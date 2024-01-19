@@ -186,21 +186,21 @@ export async function updateReview(
 
     // loops through the reviews of the dining hall and tries to find the matching post id.
     const reviews: Review[] = diningHallReview.Reviews;
-    for (let i = 0; i < reviews.length; ++i) {
-        const review: Review = reviews[i];
+    const review: Review | undefined = reviews.find(
+        review => review.review_id === Number(foodReviewID),
+    );
 
-        if (review.review_id === Number(foodReviewID)) {
-            review.feedback = feedback; // replace the old feedback with new feedback
-            review.overall = computeAverageScore(feedback); // recomputes overall with updated information
-
-            await updateReiewCollection(database, diningHall, reviews);
-            return review;
-        }
+    if (!review) {
+        throw new HttpError(status.NOT_FOUND, {
+            message: `review with reviewID ${foodReviewID} does not exist in the database`,
+        });
     }
 
-    throw new HttpError(status.NOT_FOUND, {
-        message: `review with reviewID ${foodReviewID} does not exist in the database`,
-    });
+    review.feedback = feedback; // replace the old feedback with new feedback
+    review.overall = computeAverageScore(feedback); // recomputes overall with updated information
+    await updateReiewCollection(database, diningHall, reviews);
+
+    return review;
 }
 
 /**
@@ -224,9 +224,10 @@ async function updateReiewCollection(
 /**
  * deletes an existing food review for a dining hall and returns it to the front-end.
  * @param  {string} diningHall - the name of the diningName, ex "worcester"
- * @param  {string} foodReviewID   - the food review ID
+ * @param  {string} foodReviewID - the food review ID
+ * @throws {HttpError} Throws an error if dining hall does not exist.
  */
-export async function deleteReview(diningHall: string, foodReviewID: string) {
+export async function deleteReview(diningHall: string, foodReviewID: string): Promise<void> {
     const database = MongoDB.getRateMyDineDB();
     const diningHallReview: DiningHallReview = await getDiningHallReview(diningHall);
 

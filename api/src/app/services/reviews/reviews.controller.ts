@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { Collection } from 'mongodb';
 import status from 'http-status';
 
-import { MongoDB } from '../../configs/mongodb.js';
 import { DiningInfo, Feedback, Review } from './reviews.model.js';
 import * as reviewService from './reviews.service.js';
 
@@ -11,11 +9,8 @@ import * as reviewService from './reviews.service.js';
  */
 const getAllDiningInfo = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const collection: Collection<DiningInfo> =
-            MongoDB.getRateMyDineDB().collection('diningInfo');
-        const diningInfo: DiningInfo[] = await collection.find<DiningInfo>({}).toArray();
-
-        res.status(status.OK).json(diningInfo);
+        const allDiningInfo: DiningInfo[] = await reviewService.findAllDiningInfo();
+        res.status(status.OK).json(allDiningInfo);
     } catch (error) {
         next(error);
     }
@@ -28,7 +23,7 @@ const getDiningInfo = async (req: Request, res: Response, next: NextFunction) =>
     const diningName: string = req.params.diningHall;
 
     try {
-        const diningInfo = reviewService.findDiningInfo(diningName);
+        const diningInfo: DiningInfo = await reviewService.findDiningInfo(diningName);
         res.status(status.OK).json(diningInfo);
     } catch (error) {
         next(error);

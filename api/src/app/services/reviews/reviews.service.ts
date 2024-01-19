@@ -8,6 +8,17 @@ import { computeAverageScore } from '../../utils/computeScore.utils.js';
 import { HttpError } from '../../utils/httpError.utils.js';
 
 /**
+ * Get the information about every dining hall info.
+ * @returns {Promise<DiningInfo[]>} the dining hall info document
+ */
+export async function findAllDiningInfo(): Promise<DiningInfo[]> {
+    const collection: Collection<DiningInfo> = MongoDB.getRateMyDineDB().collection('diningInfo');
+    const diningInfo: DiningInfo[] = await collection.find<DiningInfo>({}).toArray();
+
+    return diningInfo;
+}
+
+/**
  * Get the information about a dining info.
  * @param {string} diningHall - the name of the dining hall
  * @returns {Promise<DiningInfo>} the dining hall info document
@@ -149,7 +160,7 @@ export async function getReview(diningHall: string): Promise<Review[]> {
  * @param  {string} diningHall - the name of the diningName, ex "Worcester"
  * @param  {Feedback} feedback - the user's feedback including foodQuality, customerService
  * @param  {string} foodReviewID - the food review ID
- * @return {Review} the new updated review
+ * @return {Promise<Review>} the new updated review
  */
 export async function updateReview(
     diningHall: string,

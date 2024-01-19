@@ -60,9 +60,7 @@ export async function createReview(
     await updateDiningHallDocument(database, diningHall, [newFoodReview, ...reviews]);
     await updateReviewCount(database, diningHall, true);
 
-    const updatedReviews = await database
-        .collection<DiningHallReview>('reviews')
-        .findOne({ DiningHall: diningHall });
+    const updatedReviews = await getDiningHallReview(diningHall);
     return updatedReviews;
 }
 
@@ -132,33 +130,30 @@ async function updateReviewCount(
 }
 
 /**
- * Gets all the reviews for a particular dining hall and returns it to the front-end.
+ * Gets all the user reviews for a particular dining hall and returns it to the front-end.
  * @param  {string} diningHall - the name of the dinning hall.
  * @return {Promise<Review[]>} reviews from all the diningHall.
  * @throws {HttpError} Throws an error if cannot find any review.
  */
 export async function getReview(diningHall: string): Promise<Review[]> {
-    const database: Db = MongoDB.getRateMyDineDB();
-    const result = await database
-        .collection<DiningHallReview>('reviews')
-        .findOne({ DiningHall: diningHall });
+    const diningHallReview: DiningHallReview = await getDiningHallReview(diningHall);
 
-    if (!result) {
-        throw new HttpError(status.NOT_FOUND, {
-            message: `server cannot find any reviews from ${diningHall}`,
-        });
-    }
-
-    // loop over every review for that dining hall
-    const review: Review[] = [];
-    for (const comment of result.Reviews) {
-        comment.review_date = createReviewDate(comment.review_date); // convert the date
-        review.push(comment);
-    }
-    return review;
+    const reviews: Review[] = diningHallReview.Reviews;
+    return reviews.map(review => {
+        return {
+            ...review,
+            review_date: createReviewDate(review.review_date), // convert the date
+        };
+    });
 }
 
-export async function getDiningHallReview(diningHall: string): Promise<DiningHallReview> {
+/**
+ * Gets all the dining hall reviews for a particular dining hall
+ * @param  {string} diningHall - the name of the dinning hall.
+ * @return {Promise<DiningHallReview>} dining hall reviews document
+ * @throws {HttpError} Throws an error if cannot find any dining hall.
+ */
+async function getDiningHallReview(diningHall: string): Promise<DiningHallReview> {
     const database = MongoDB.getRateMyDineDB();
     const document = await database
         .collection<DiningHallReview>('reviews')
@@ -235,12 +230,11 @@ export async function deleteReview(diningHall: string, foodReviewID: string) {
     const database = MongoDB.getRateMyDineDB();
     const diningHallReview: DiningHallReview = await getDiningHallReview(diningHall);
 
-    /* find the index of the review and delete it */
     const reviews: Review[] = diningHallReview.Reviews;
-    const filteredReviews = reviews.filter(review => review.review_id === Number(foodReviewID));
+    const filteredReviews = reviews.filter(review => review.review_id !== Number(foodReviewID));
 
-    if (filteredReviews.length === 0) {
-        throw new HttpError(404, {
+    if (filteredReviews.length === reviews.length) {
+        throw new HttpError(status.NOT_FOUND, {
             message: `review with reviewID ${foodReviewID} does not exist in the database`,
         });
     }

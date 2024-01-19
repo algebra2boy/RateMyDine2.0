@@ -84,7 +84,7 @@ const deleteReviewForDiningHall = async (req: Request, res: Response, next: Next
 
     try {
         await reviewService.deleteReview(diningHallName, foodReviewID);
-        res.status(status.OK);
+        res.status(status.OK).send('OK');
     } catch (error) {
         next(error);
     }

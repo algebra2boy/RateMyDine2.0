@@ -75,10 +75,26 @@ const updateReviewForDiningHall = async (req: Request, res: Response, next: Next
     }
 };
 
+/**
+ *delete an existing food review for a particular dining hall
+ */
+const deleteReviewForDiningHall = async (req: Request, res: Response, next: NextFunction) => {
+    const diningHallName = req.params.dininghall;
+    const foodReviewID = req.params.reviewID;
+
+    try {
+        await reviewService.deleteReview(diningHallName, foodReviewID);
+        res.status(status.OK);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export {
     getAllDiningInfo,
     getDiningInfo,
     getReviewByDiningHall,
     createReviewForDiningHall,
     updateReviewForDiningHall,
+    deleteReviewForDiningHall,
 };

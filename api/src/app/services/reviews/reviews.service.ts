@@ -52,21 +52,13 @@ export async function createReview(
     username: string,
 ): Promise<DiningHallReview | null> {
     const database: Db = MongoDB.getRateMyDineDB();
-    const document = await database
-        .collection<DiningHallReview>('reviews')
-        .findOne({ DiningHall: diningHall });
+    const diningHallReview: DiningHallReview = await getDiningHallReview(diningHall);
 
-    if (!document) {
-        throw new HttpError(status.NOT_FOUND, {
-            message: `${diningHall} does not exist in the reviews collection`,
-        });
-    }
-
-    const reviews: Review[] = document.Reviews;
+    const reviews: Review[] = diningHallReview.Reviews;
     const newFoodReview: Review = constructFoodReview(reviews, diningHall, feedback, username);
 
     await updateDiningHallDocument(database, diningHall, [newFoodReview, ...reviews]);
-    await updateReviewCount(database, diningHall);
+    await updateReviewCount(database, diningHall, true);
 
     const updatedReviews = await database
         .collection<DiningHallReview>('reviews')
@@ -120,13 +112,20 @@ async function updateDiningHallDocument(
  * Update the number of reviews in the diningInfo
  * @param {Db} database -  The mongodb database for RateMyDine
  * @param {string} diningHall - the name of the dining hall
+ * @param {boolean} isIncrementing - true for increasing the review count; otherwise, decreasing
  */
-async function updateReviewCount(database: Db, diningHall: string): Promise<void> {
+async function updateReviewCount(
+    database: Db,
+    diningHall: string,
+    isIncrementing: boolean,
+): Promise<void> {
     const diningInfo: DiningInfo = await findDiningInfo(diningHall);
 
     const filter = { name: diningHall };
     const updateDoc = {
-        $set: { numReviews: diningInfo.numReviews + 1 },
+        $set: {
+            numReviews: isIncrementing ? diningInfo.numReviews + 1 : diningInfo.numReviews - 1,
+        },
     };
 
     await database.collection('diningInfo').updateOne(filter, updateDoc);
@@ -144,7 +143,7 @@ export async function getReview(diningHall: string): Promise<Review[]> {
         .collection<DiningHallReview>('reviews')
         .findOne({ DiningHall: diningHall });
 
-    if (!result || !result.Reviews) {
+    if (!result) {
         throw new HttpError(status.NOT_FOUND, {
             message: `server cannot find any reviews from ${diningHall}`,
         });
@@ -159,8 +158,23 @@ export async function getReview(diningHall: string): Promise<Review[]> {
     return review;
 }
 
+export async function getDiningHallReview(diningHall: string): Promise<DiningHallReview> {
+    const database = MongoDB.getRateMyDineDB();
+    const document = await database
+        .collection<DiningHallReview>('reviews')
+        .findOne({ DiningHall: diningHall });
+
+    if (!document) {
+        throw new HttpError(status.NOT_FOUND, {
+            message: `${diningHall} does not exist in the reviews collection`,
+        });
+    }
+
+    return document;
+}
+
 /**
- * update an existing food review for a dining hall and returns it to the front-end.
+ * updates an existing food review for a dining hall and returns it to the front-end.
  * @param  {string} diningHall - the name of the diningName, ex "Worcester"
  * @param  {Feedback} feedback - the user's feedback including foodQuality, customerService
  * @param  {string} foodReviewID - the food review ID
@@ -173,18 +187,10 @@ export async function updateReview(
     foodReviewID: string,
 ): Promise<Review> {
     const database: Db = MongoDB.getRateMyDineDB();
-    const document = await database
-        .collection<DiningHallReview>('reviews')
-        .findOne({ DiningHall: diningHall });
-
-    if (!document) {
-        throw new HttpError(status.NOT_FOUND, {
-            message: `${diningHall} does not exist in the reviews collection`,
-        });
-    }
+    const diningHallReview: DiningHallReview = await getDiningHallReview(diningHall);
 
     // loops through the reviews of the dining hall and tries to find the matching post id.
-    const reviews: Review[] = document.Reviews;
+    const reviews: Review[] = diningHallReview.Reviews;
     for (let i = 0; i < reviews.length; ++i) {
         const review: Review = reviews[i];
 
@@ -203,10 +209,10 @@ export async function updateReview(
 }
 
 /**
- * PUTS the document back into the database as update.
+ * puts the document back into the database as update.
  * @param {Db} database - The mongodb database for RateMyDine
  * @param {string} diningHall - the dining hall name
- * @param {Review[]} reviews - reviews from the dining hall
+ * @param {Review[]} reviews - new reviews from the dining hall
  */
 async function updateReiewCollection(
     database: Db,
@@ -220,44 +226,25 @@ async function updateReiewCollection(
     await database.collection('reviews').updateOne(filter, update, option);
 }
 
-// /**
-//  *  delete an existing food review for a dining hall and returns it to the front-end.
-//  * @param  {string} diningHallName -  the name of the diningName, ex "worcester"
-//  * @param  {string} foodReviewID   -  the food review ID
-//  * @return {boolean} found          -  whether we found a review with the matching food review ID
-//  */
-// async function deleteReview(diningHall: string, foodReviewID: string) {
-//     const database = MongoDB.getRateMyDineDB();
-//     const document = await database.collection('reviews').findOne({ DiningHall: diningHall }); // gets the dining hall requested in the body of the delete request
-//     let found = false; // flag for loop
-//     let i = undefined; // place holder
+/**
+ * deletes an existing food review for a dining hall and returns it to the front-end.
+ * @param  {string} diningHall - the name of the diningName, ex "worcester"
+ * @param  {string} foodReviewID   - the food review ID
+ */
+export async function deleteReview(diningHall: string, foodReviewID: string) {
+    const database = MongoDB.getRateMyDineDB();
+    const diningHallReview: DiningHallReview = await getDiningHallReview(diningHall);
 
-//     for (i = 0; i < (document !== null ? document.Reviews.length : 0); i++) {
-//         // looping through the reviews of the dining hall for to find the corresponding id of the message to be deleted.
-//         if (document !== null && document.Reviews[i].review_id === Number(foodReviewID)) {
-//             found = true; //when found, set flag - break
-//             break;
-//         }
-//     }
+    /* find the index of the review and delete it */
+    const reviews: Review[] = diningHallReview.Reviews;
+    const filteredReviews = reviews.filter(review => review.review_id === Number(foodReviewID));
 
-//     if (found && document !== null) {
-//         // if flag is set
-//         document.Reviews.splice(i, 1); // remove the review from the reviews array.
-//         await database
-//             .collection('reviews')
-//             .updateOne(
-//                 { DiningHall: diningHall },
-//                 { $set: { Reviews: document.Reviews } },
-//                 { upsert: true },
-//             ); // PUT the updated document back into the database
-//         await database
-//             .collection('diningInfo')
-//             .updateOne(
-//                 { name: diningHall },
-//                 { $set: { numReviews: document.Reviews.length } },
-//                 { upsert: true },
-//             ); // update the count with the length of reviews array.
-//     }
+    if (filteredReviews.length === 0) {
+        throw new HttpError(404, {
+            message: `review with reviewID ${foodReviewID} does not exist in the database`,
+        });
+    }
 
-//     return found;
-// }
+    await updateReiewCollection(database, diningHall, filteredReviews);
+    await updateReviewCount(database, diningHall, false);
+}

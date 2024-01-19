@@ -15,15 +15,6 @@ reviewRouter.put(
     ZodMW(reviewSchema),
     reviewController.updateReviewForDiningHall,
 );
-
-// // delete an existing food review for a particular dining hall
-// reviewRouter.delete("/review/:dininghall/:reviewID", async (req, res) => {
-
-//     let diningHallName = req.params.dininghall;
-//     let foodReviewID   = req.params.reviewID;
-
-//     let result = await dbUtils.deleteReview(diningHallName, foodReviewID);
-//     res.send(result);
-// });
+reviewRouter.delete('/:dininghall/:reviewID', reviewController.deleteReviewForDiningHall);
 
 export default reviewRouter;

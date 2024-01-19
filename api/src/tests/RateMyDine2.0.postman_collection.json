@@ -191,28 +191,16 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "DeleteReview",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
 				}
 			]
-		},
-		{
-			"name": "default",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "localhost:8080/api/auth/testlogin",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"auth",
-						"testlogin"
-					]
-				}
-			},
-			"response": []
 		}
 	]
 }

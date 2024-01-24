@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import status from 'http-status';
 import { ZodError, ZodSchema } from 'zod';
 
 /**
@@ -14,7 +15,9 @@ const ZodMiddleware = (schema: ZodSchema) => (req: Request, res: Response, next:
 
         next();
     } catch (error) {
-        return res.status(400).send((error as ZodError).issues.map(x => x.message));
+        return res.status(status.BAD_REQUEST).json({
+            errors: (error as ZodError).issues.map(x => x.message),
+        });
     }
 };
 

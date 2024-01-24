@@ -140,7 +140,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"foodQuality\": 1,\n    \"customerService\": 2,\n    \"atmosphere\": 3,\n    \"healthiness\": 4,\n    \"seatAvailability\": 4,\n    \"taste\": 1,\n    \"description\": \"Testing Testing\"\n}\n",
+							"raw": "{\n    \"foodQuality\": 1,\n    \"customerService\": 2,\n    \"atmosphere\": 3,\n    \"healthiness\": 4,\n    \"seatAvailability\": 5,\n    \"taste\": 5,\n    \"description\": \"Testing refactor 5.0\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -161,28 +161,46 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "updateReview",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"foodQuality\": 1,\n    \"customerService\": 1,\n    \"atmosphere\": 1,\n    \"healthiness\": 1,\n    \"seatAvailability\": 1,\n    \"taste\": 1,\n    \"description\": \"I am sad\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/reviews/Bluewall/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"reviews",
+								"Bluewall",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteReview",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
 				}
 			]
-		},
-		{
-			"name": "default",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "localhost:8080/api/auth/testlogin",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"auth",
-						"testlogin"
-					]
-				}
-			},
-			"response": []
 		}
 	]
 }

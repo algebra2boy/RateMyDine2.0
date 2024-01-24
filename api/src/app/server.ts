@@ -2,7 +2,8 @@ import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import compression from "compression";
+import compression from 'compression';
+import status from 'http-status';
 import 'dotenv/config';
 
 import { MongoDB } from './configs/mongodb.js';
@@ -21,12 +22,13 @@ app.use(morganMiddleware);
 app.use(helmet());
 app.use(compression());
 app.use(cors());
+app.use(express.static('src/public')); // serve static files
 app.use(express.json());
-app.use(errorMiddleware);
 app.use(routes);
+app.use(errorMiddleware); // this must be placed at the end
 
 app.get('/', (req: Request, res: Response) => {
-    res.status(201).json({ message: 'hello' });
+    res.status(status.OK).json({ message: 'hello' });
 });
 
 // Establish mongodb connection

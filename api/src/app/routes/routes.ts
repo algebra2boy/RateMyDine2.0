@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import authRoute from '../services/auth/auth.routes.js';
 import profileRoute from '../services/profile/profile.routes.js';
 import reviewRoute from '../services/reviews/reviews.routes.js';

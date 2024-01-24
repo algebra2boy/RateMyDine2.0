@@ -1,6 +1,10 @@
 import adapter from '@sveltejs/adapter-node';
 import preprocess from "svelte-preprocess";
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -9,7 +13,9 @@ const config = {
 		vitePreprocess(),
 		// add preprocessor to process postcss
 		preprocess({
-			postcss: true,
+			postcss: {
+				configFilePath: join(__dirname, 'postcss.config.js')
+			},
 		}),
 	],
 	kit: {

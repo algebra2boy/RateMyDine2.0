@@ -1,5 +1,5 @@
 <script>
-	import "./app.pcss";
+	// import "./app.pcss";
 </script>
 
 <nav class="border-gray-200 bg-white dark:bg-gray-900">
@@ -65,3 +65,9 @@
 		</div>
 	</div>
 </nav>
+
+<style lang="postcss">
+	.nav-btn{
+		@apply block rounded px-3 py-2 text-gray-900 bg-pink-200 hover:bg-blue-700;
+	}
+</style>

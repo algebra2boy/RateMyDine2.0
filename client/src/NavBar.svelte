@@ -6,7 +6,7 @@
 	};
 </script>
 
-<nav class="navbar-container maroon">
+<nav class="navbar-container">
 	<div class="navbar-row">
 		<a href="/" class="logo-container">
 			<img src="logo.png" class="h-11" alt="RMD Logo" />
@@ -27,10 +27,10 @@
 		<div class="w-full md:block md:w-auto" class:hidden={isCollapsedButtonClicked}>
 			<ul class="nav-list">
 				<li>
-					<a href="/" class="nav-btn maroon">Log in</a>
+					<a href="/" class="nav-btn">Log in</a>
 				</li>
 				<li>
-					<a href="/" class="nav-btn maroon">Sign up</a>
+					<a href="/" class="nav-btn">Sign up</a>
 				</li>
 			</ul>
 		</div>
@@ -39,10 +39,6 @@
 
 <style lang="postcss">
 	.navbar-container {
-		@apply border-gray-200 bg-gray-50 dark:bg-gray-800;
-	}
-
-	.maroon {
 		background-color: maroon;
 	}
 
@@ -51,11 +47,14 @@
 	}
 
 	.logo-container {
-		@apply flex items-center rtl:space-x-reverse;
+		@apply flex items-center;
 	}
 
 	.nav-list {
-		@apply mt-4 flex flex-col rounded-lg bg-gray-50 font-medium md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-transparent rtl:space-x-reverse dark:border-gray-700 dark:bg-gray-800 md:dark:bg-transparent;
+		@apply mt-4 flex flex-col rounded-lg font-medium;
+
+		/* "md:" is used to handle screen size for min-width 768px  */
+		@apply md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-transparent;
 	}
 
 	.nav-title {
@@ -63,12 +62,13 @@
 	}
 
 	.nav-btn {
-		@apply block px-3 py-2 text-gray-900 hover:bg-gray-100 md:p-0 md:hover:bg-transparent
-		 md:hover:text-blue-700 dark:border-gray-700 dark:text-white 
-		 dark:hover:bg-gray-400 dark:hover:text-white md:dark:hover:bg-transparent md:dark:hover:text-blue-500;
+		@apply block px-3 py-2 text-white hover:bg-gray-400; 
+		@apply md:p-0 md:hover:bg-transparent md:hover:text-blue-700;
+		background-color: maroon;
 	}
 
 	.collpase-btn {
-		@apply inline-flex h-10 w-10 items-center justify-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 md:hidden dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600;
+		@apply inline-flex h-10 w-10 items-center justify-center rounded-lg p-2 text-sm text-gray-500;
+		@apply hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 md:hidden;
 	}
 </style>
